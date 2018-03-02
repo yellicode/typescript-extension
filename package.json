@@ -1,0 +1,29 @@
+{
+  "name": "@yellicode/typescript",
+  "version": "0.1.1",
+  "description": "TypeScript extension for Yellicode - an extensible code generator.",
+  "license": "MIT",
+  "main": "dist/bundles/typescript.umd.js",
+  "module": "dist/es5/typescript.js",
+  "es2015": "dist/es6/typescript.js",
+  "types": "dist/types/typescript.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yellicode/yellicode-typescript.git"
+  },
+  "dependencies": {
+    "@yellicode/model": "^0.1.4",
+    "@yellicode/templating": "^0.1.2"
+  },
+  "devDependencies": {
+    "rollup": "^0.50.0"
+  },
+  "scripts": {
+    "build:es5": "tsc",
+    "build:es6": "tsc -m es6 -t es6 --outDir dist/es6 --declaration --declarationDir dist/types",
+    "build:umd": "./node_modules/.bin/rollup --config rollup.config.js",
+    "build:dist": "npm run build:es5 & npm run build:es6 & npm run build:umd",
+    "build": "npm run build:dist",
+    "prepublish": "npm run build:dist"
+  }
+}
