@@ -11,6 +11,11 @@ License: MIT
 ### Prerequisites
 In order to run a code generation template, you must have the CLI installed (@yellicode/cli) globally and have a valid *codegenconfig.json* file in your working directory. Please refer to the [installation instructions](https://www.yellicode.com/docs/installation) and the [quick start](https://www.yellicode.com/docs/quickstart) for more.
 
+You should also have the *@yellicode/model* package installed in your working directory:
+```
+npm install @yellicode/model --save-dev
+```
+
 ### Installation
 Open a terminal/command prompt in your working directory and install this package as a dev dependency:
 
