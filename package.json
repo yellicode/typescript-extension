@@ -1,6 +1,6 @@
 {
   "name": "@yellicode/typescript",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "TypeScript extension for Yellicode - an extensible code generator.",
   "license": "MIT",
   "main": "dist/bundles/typescript.umd.js",
@@ -9,7 +9,7 @@
   "types": "dist/types/typescript.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yellicode/yellicode-typescript.git"
+    "url": "github:yellicode/typescript-extension.git"
   },
   "dependencies": {
     "@yellicode/model": "^0.1.4",
