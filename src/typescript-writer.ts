@@ -123,7 +123,7 @@ export class TypeScriptWriter extends CodeWriter {
             this.write('?');
         }
         // The type        
-        this.write(`: ${this.getTypeName(property.type) || 'any'}`);
+        this.write(`: ${this.getTypeName(property) || 'any'}`);
         if (property.isMultivalued()) {
             this.write('[]');
         }
@@ -305,7 +305,7 @@ export class TypeScriptWriter extends CodeWriter {
     private getParameterTypeName(parameter: model.Parameter | null): string | null {
         if (!parameter) return null;
 
-        var typeName = this.getTypeName(parameter.type) || 'any';
+        var typeName = this.getTypeName(parameter) || 'any';
         if (parameter.isMultivalued()) {
             typeName = `${typeName}[]`;
         }
@@ -324,7 +324,7 @@ export class TypeScriptWriter extends CodeWriter {
     private writeGeneralizations(generalizations: model.Generalization[], additional: string[] | undefined): void {
         const allNames: string[] = [];
         if (generalizations) {
-            allNames.push(...generalizations.map(g => this.getTypeName(g.general)!));
+            allNames.push(...generalizations.map(g => g.general.name));
         }
         if (additional) {
             allNames.push(...additional);
@@ -339,7 +339,7 @@ export class TypeScriptWriter extends CodeWriter {
     private writeInterfaceRealizations(realizations: model.InterfaceRealization[], additional: string[] | undefined): void {
         const allNames: string[] = [];
         if (realizations) {
-            allNames.push(...realizations.map(ir => this.getTypeName(ir.contract)!));
+            allNames.push(...realizations.map(ir => ir.contract.name));
         }
         if (additional) {
             allNames.push(...additional);
@@ -383,7 +383,7 @@ export class TypeScriptWriter extends CodeWriter {
         const tag = isReturn ? 'returns' : 'param';
         const commentBodies = parameter.ownedComments.map(c => c.body);
 
-        let typeName = this.getTypeName(parameter.type) || 'any';
+        let typeName = this.getTypeName(parameter) || 'any';
         if (parameter.isMultivalued()) {
             typeName = `${typeName}[]`;
         }
@@ -449,10 +449,9 @@ export class TypeScriptWriter extends CodeWriter {
         }
     }
 
-    private getTypeName(type: model.Type | null): string | null {
-        if (!type) return null;
-        if (!this.typeNameProvider) return type.name;
-        return this.typeNameProvider.getTypeName(type);
+    private getTypeName(typedElement: model.TypedElement | null): string | null {
+        if (!typedElement || typedElement.type) return null;
+        return this.typeNameProvider ? this.typeNameProvider.getTypeName(typedElement) : typedElement.getTypeName();        
     }
 
     private joinWrite<TItem>(collection: TItem[], separator: string, getStringFunc: (item: TItem) => string | null) {
