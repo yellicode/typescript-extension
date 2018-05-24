@@ -450,7 +450,7 @@ export class TypeScriptWriter extends CodeWriter {
     }
 
     private getTypeName(typedElement: elements.TypedElement | null): string | null {
-        if (!typedElement || typedElement.type) return null;
+        if (!typedElement) return null;
         return this.typeNameProvider ? this.typeNameProvider.getTypeName(typedElement) : typedElement.getTypeName();        
     }
 

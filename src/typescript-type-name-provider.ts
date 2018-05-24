@@ -3,7 +3,7 @@ import { DefaultTypeNameProvider } from '@yellicode/templating';
 
 export class TypeScriptTypeNameProvider extends DefaultTypeNameProvider {
     protected /*override*/ getDataTypeName(typedElement: elements.TypedElement): string | null {
-        if (!typedElement || !typedElement.type)
+        if (!typedElement.type)
             return null;
 
         const t = typedElement.type;
