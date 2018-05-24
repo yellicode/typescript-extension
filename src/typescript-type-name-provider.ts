@@ -1,17 +1,17 @@
-﻿import * as model from '@yellicode/model';
+﻿import * as elements from '@yellicode/elements';
 import { DefaultTypeNameProvider } from '@yellicode/templating';
 
 export class TypeScriptTypeNameProvider extends DefaultTypeNameProvider {
-    protected /*override*/ getDataTypeName(typedElement: model.TypedElement): string | null {
+    protected /*override*/ getDataTypeName(typedElement: elements.TypedElement): string | null {
         if (!typedElement || !typedElement.type)
             return null;
 
         const t = typedElement.type;
-        if (model.isPrimitiveBoolean(t)) return "boolean";
-        if (model.isPrimitiveInteger(t) || model.isPrimitiveReal(t))
+        if (elements.isPrimitiveBoolean(t)) return "boolean";
+        if (elements.isPrimitiveInteger(t) || elements.isPrimitiveReal(t))
             return "number";
-        if (model.isPrimitiveString(t)) return "string";
-        if (model.isPrimitiveObject(t)) return "any";
+        if (elements.isPrimitiveString(t)) return "string";
+        if (elements.isPrimitiveObject(t)) return "any";
 
         return super.getDataTypeName(typedElement);
     }

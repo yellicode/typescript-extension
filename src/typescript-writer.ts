@@ -1,4 +1,4 @@
-﻿import * as model from '@yellicode/model';
+﻿import * as elements from '@yellicode/elements';
 import * as opts from './options';
 
 import { CodeWriter, TextWriter, CodeWriterUtility, TypeNameProvider } from '@yellicode/templating';
@@ -38,7 +38,7 @@ export class TypeScriptWriter extends CodeWriter {
      * @param contents A callback function that writes the class contents.
      * @param options An optional ClassOptions object.
      */
-    public writeClassBlock(cls: model.Class, contents: (writer: TypeScriptWriter, cls: model.Class) => void, options?: opts.ClassOptions) {
+    public writeClassBlock(cls: elements.Class, contents: (writer: TypeScriptWriter, cls: elements.Class) => void, options?: opts.ClassOptions) {
         if (!cls) return;
         if (!options) options = {};
 
@@ -71,7 +71,7 @@ export class TypeScriptWriter extends CodeWriter {
       * @param contents A callback function that writes the interface contents.
       * @param options An optional InterfaceOptions object.
       */
-    public writeInterfaceBlock(iface: model.Interface, contents: (writer: TypeScriptWriter, cls: model.Interface) => void, options?: opts.InterfaceOptions) {
+    public writeInterfaceBlock(iface: elements.Interface, contents: (writer: TypeScriptWriter, cls: elements.Interface) => void, options?: opts.InterfaceOptions) {
         if (!iface) return;
         if (!options) options = {};
 
@@ -96,7 +96,7 @@ export class TypeScriptWriter extends CodeWriter {
      * @param property The property to write.
      * @param options An optional PropertyOptions object.
      */
-    public writeProperty(property: model.Property, options?: opts.PropertyOptions) {
+    public writeProperty(property: elements.Property, options?: opts.PropertyOptions) {
         if (!property) return;
         if (!options) options = {};
 
@@ -110,7 +110,7 @@ export class TypeScriptWriter extends CodeWriter {
         // Start a new, indented line        
         this.writeIndent();
         // Access modifier (+ white space)
-        if ((features & opts.PropertyFeatures.AccessModifier) && !model.isInterface(property.owner)) {
+        if ((features & opts.PropertyFeatures.AccessModifier) && !elements.isInterface(property.owner)) {
             this.writeAccessModifier(property.visibility);
         }
         // Readonly modifier
@@ -142,7 +142,7 @@ export class TypeScriptWriter extends CodeWriter {
      * @param element The enumeration.     
      * @param options An optional EnumerationOptions object.
      */
-    public writeEnumeration(enumeration: model.Enumeration, options: opts.EnumOptions): void {
+    public writeEnumeration(enumeration: elements.Enumeration, options: opts.EnumOptions): void {
         if (!enumeration) return;
         if (!options) options = {};
         const features = (options.features === undefined) ? opts.EnumFeatures.All : options.features;
@@ -171,7 +171,7 @@ export class TypeScriptWriter extends CodeWriter {
                 this.write(literal.name);
                 if ((features & opts.EnumFeatures.Initializers) && literal.specification) {
                     let initialValue = literal.specification.getStringValue();
-                    if (model.isLiteralString(literal.specification)) {
+                    if (elements.isLiteralString(literal.specification)) {
                         initialValue = `'${initialValue}'`; // a string enum: wrap in quotes
                     }
                     this.write(` = ${initialValue}`);
@@ -189,7 +189,7 @@ export class TypeScriptWriter extends CodeWriter {
      * @param enumeration The enumeration.     
      * @param prefix An optional prefix, such as 'export'.
      */
-    public writeStringLiteralType(enumeration: model.Enumeration, prefix?: string): void {
+    public writeStringLiteralType(enumeration: elements.Enumeration, prefix?: string): void {
         this.writeJsDocDescription(enumeration.ownedComments);
         this.writeIndent();
         if (prefix && prefix.length > 0) {
@@ -205,7 +205,7 @@ export class TypeScriptWriter extends CodeWriter {
      * @param operation The operation. 
      * @param options An optional FunctionOptions object.
      */
-    public writeFunctionDeclaration(operation: model.Operation, options?: opts.FunctionOptions): void {
+    public writeFunctionDeclaration(operation: elements.Operation, options?: opts.FunctionOptions): void {
         if (!operation) return;
         this.writeFunctionStart(operation, options);
         this.writeEndOfLine(';');
@@ -217,7 +217,7 @@ export class TypeScriptWriter extends CodeWriter {
     * @param contents A callback that writes the operation contents.
     * @param options An optional FunctionOptions object.
     */
-    public writeFunctionBlock(operation: model.Operation, contents: (writer: TypeScriptWriter, op: model.Operation) => void, options?: opts.FunctionOptions): void {
+    public writeFunctionBlock(operation: elements.Operation, contents: (writer: TypeScriptWriter, op: elements.Operation) => void, options?: opts.FunctionOptions): void {
         if (!operation) return;
 
         this.writeFunctionStart(operation, options);
@@ -229,7 +229,7 @@ export class TypeScriptWriter extends CodeWriter {
         this.writeCodeBlock((writer) => { contents(writer, operation) });
     }
 
-    private writeFunctionStart(operation: model.Operation, options?: opts.FunctionOptions): void {
+    private writeFunctionStart(operation: elements.Operation, options?: opts.FunctionOptions): void {
         if (!operation) return;
         if (!options) options = {};
         const features = (options.features === undefined) ? opts.FunctionFeatures.All : options.features;
@@ -245,7 +245,7 @@ export class TypeScriptWriter extends CodeWriter {
         this.writeJsDocLines(jsDocLines);
         // Start a new, indented line
         this.writeIndent();
-        if (!model.isInterface(operation.owner)) {
+        if (!elements.isInterface(operation.owner)) {
             this.writeAccessModifier(operation.visibility);
         }
         if (operation.isStatic) {
@@ -274,15 +274,15 @@ export class TypeScriptWriter extends CodeWriter {
         }
     }
 
-    private writeInOutParameters(elements: model.Parameter[], optionalityModifier?: opts.OptionalityModifier): void {
+    private writeInOutParameters(parameters: elements.Parameter[], optionalityModifier?: opts.OptionalityModifier): void {
         if (!elements)
             return;
 
         if (optionalityModifier === undefined) optionalityModifier = opts.OptionalityModifier.NullKeyword;
 
         let i = 0;
-        elements.forEach((p: model.Parameter) => {
-            if (p.direction === model.ParameterDirectionKind.return)
+        parameters.forEach((p: elements.Parameter) => {
+            if (p.direction === elements.ParameterDirectionKind.return)
                 return;
 
             const makeOptional = p.isOptional();
@@ -302,7 +302,7 @@ export class TypeScriptWriter extends CodeWriter {
         });
     }
 
-    private getParameterTypeName(parameter: model.Parameter | null): string | null {
+    private getParameterTypeName(parameter: elements.Parameter | null): string | null {
         if (!parameter) return null;
 
         var typeName = this.getTypeName(parameter) || 'any';
@@ -312,7 +312,7 @@ export class TypeScriptWriter extends CodeWriter {
         return typeName;
     }
 
-    private writeAccessModifier(visibilityKind: model.VisibilityKind | null): void {
+    private writeAccessModifier(visibilityKind: elements.VisibilityKind | null): void {
         const visibilityString = TypeScriptWriter.getAccessModifierString(visibilityKind);
         if (!visibilityString)
             return;
@@ -321,7 +321,7 @@ export class TypeScriptWriter extends CodeWriter {
         this.writeWhiteSpace();
     }
 
-    private writeGeneralizations(generalizations: model.Generalization[], additional: string[] | undefined): void {
+    private writeGeneralizations(generalizations: elements.Generalization[], additional: string[] | undefined): void {
         const allNames: string[] = [];
         if (generalizations) {
             allNames.push(...generalizations.map(g => g.general.name));
@@ -336,7 +336,7 @@ export class TypeScriptWriter extends CodeWriter {
         this.joinWrite(allNames, ', ', name => name);
     }
 
-    private writeInterfaceRealizations(realizations: model.InterfaceRealization[], additional: string[] | undefined): void {
+    private writeInterfaceRealizations(realizations: elements.InterfaceRealization[], additional: string[] | undefined): void {
         const allNames: string[] = [];
         if (realizations) {
             allNames.push(...realizations.map(ir => ir.contract.name));
@@ -351,12 +351,12 @@ export class TypeScriptWriter extends CodeWriter {
         this.joinWrite(allNames, ', ', name => name);
     }
 
-    private pushJsDocLinesFromComments(comments: model.Comment[], lines: string[]): void {
+    private pushJsDocLinesFromComments(comments: elements.Comment[], lines: string[]): void {
         if (!comments)
             return;
 
         let i = 0;
-        comments.forEach((p: model.Comment) => {
+        comments.forEach((p: elements.Comment) => {
             if (!p.body) {
                 return;
             }
@@ -369,17 +369,17 @@ export class TypeScriptWriter extends CodeWriter {
 
     }
 
-    private pushJsDocLinesForParameters(parameters: model.Parameter[], lines: string[]): void {
+    private pushJsDocLinesForParameters(parameters: elements.Parameter[], lines: string[]): void {
         if (!parameters)
             return;
 
-        parameters.forEach((p: model.Parameter) => {
+        parameters.forEach((p: elements.Parameter) => {
             lines.push(this.getJsDocLineForParameter(p));
         });
     }
 
-    private getJsDocLineForParameter(parameter: model.Parameter): string {
-        const isReturn = parameter.direction === model.ParameterDirectionKind.return;
+    private getJsDocLineForParameter(parameter: elements.Parameter): string {
+        const isReturn = parameter.direction === elements.ParameterDirectionKind.return;
         const tag = isReturn ? 'returns' : 'param';
         const commentBodies = parameter.ownedComments.map(c => c.body);
 
@@ -399,7 +399,7 @@ export class TypeScriptWriter extends CodeWriter {
     }
 
 
-    public writeJsDocDescription(comments: model.Comment[]): void
+    public writeJsDocDescription(comments: elements.Comment[]): void
     public writeJsDocDescription(text: string): void
     public writeJsDocDescription(data: any): void {
         const lines: string[] = [];
@@ -436,20 +436,20 @@ export class TypeScriptWriter extends CodeWriter {
         this.writeLine('*/');
     }
 
-    private static getAccessModifierString(visibility: model.VisibilityKind | null): string | null {
+    private static getAccessModifierString(visibility: elements.VisibilityKind | null): string | null {
         switch (visibility) {
-            case model.VisibilityKind.public:
+            case elements.VisibilityKind.public:
                 return 'public';
-            case model.VisibilityKind.private:
+            case elements.VisibilityKind.private:
                 return 'private';
-            case model.VisibilityKind.protected:
+            case elements.VisibilityKind.protected:
                 return 'protected';
             default:
                 return null;
         }
     }
 
-    private getTypeName(typedElement: model.TypedElement | null): string | null {
+    private getTypeName(typedElement: elements.TypedElement | null): string | null {
         if (!typedElement || typedElement.type) return null;
         return this.typeNameProvider ? this.typeNameProvider.getTypeName(typedElement) : typedElement.getTypeName();        
     }
