@@ -67,8 +67,20 @@ export interface ClassOptions {
      */
     inherits?: string[];
     /**
-     *  Any string to prefix the class keyword with, such as "export".
+     * Indicates if the class must be exported or not (using the 'export' keyword).
+     * By default, the class is exported only if it has public or package visibility.
      */
+    export?: boolean;
+    /**
+     * True if the class definition should contain the 'declare' keyword.
+     */
+    declare?: boolean;
+    /** 
+    * Any string to prefix the class keyword with, such as "export".
+    * Indicates if the class must be exported or not (using the 'export' keyword).
+    * By default, the class is exported only if it has public or package visibility.    
+    * @deprecated Use the 'export' or 'declare' option instead.
+    */
     prefix?: string;
 }
 
@@ -90,8 +102,20 @@ export interface InterfaceOptions {
     */
     inherits?: string[];
     /**
-    *  Any string to prefix the interface keyword with, such as "export".
+    * Indicates if the interface must be exported or not (using the 'export' keyword).
+    * By default, the interface is exported only if it has public or package visibility.
     */
+    export?: boolean;
+    /**
+     * True if the interface definition should contain the 'declare' keyword.
+     */
+    declare?: boolean;
+    /** 
+   * Any string to prefix the interface keyword with, such as "export".
+   * Indicates if the class must be exported or not (using the 'export' keyword).
+   * By default, the class is exported only if it has public or package visibility.    
+   * @deprecated Use the 'export' or 'declare' option instead.
+   */
     prefix?: string;
 }
 

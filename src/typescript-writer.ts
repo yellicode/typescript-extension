@@ -1,8 +1,10 @@
 ﻿import * as elements from '@yellicode/elements';
 import * as opts from './options';
 
-import { CodeWriter, TextWriter, CodeWriterUtility, TypeNameProvider } from '@yellicode/templating';
+import { CodeWriter, TextWriter, CodeWriterUtility, TypeNameProvider, NameUtility } from '@yellicode/templating';
 import { TypeScriptTypeNameProvider } from './typescript-type-name-provider';
+import { ClassDefinition, InterfaceDefinition } from './model';
+import { TypeScriptModelBuilder } from './model-builder';
 
 /**
  * Provides code writing functionality specific for TypeScript. 
@@ -20,10 +22,46 @@ export class TypeScriptWriter extends CodeWriter {
     }
 
     /**
+     * Writes an import statement that imports the specified exports from the
+     * specified module. 
+     * @param moduleName The module to import from.
+     * @param exports The name(s) of the export(s) to be imported.
+     * @param alias The alias under which the module should be imported.
+     */
+    public writeImports(moduleName: string, alias: string): void
+    public writeImports(moduleName: string, ...exports: any[]): void
+    public writeImports(moduleName: string, x: any): void {
+        if (!moduleName)
+            return;
+
+        if (x instanceof Array) {
+            this.writeLine(`import { ${x.join(', ')} } from '${moduleName}';`);
+            return;
+        }
+        // x is the alias
+        if (!x) {
+            x = TypeScriptWriter.makeSafeModuleName(moduleName);
+        }
+        this.writeLine(`import * as ${x} from '${moduleName}';`);
+    }
+
+    /**
+    * Writes an indented block of decorator code, wrapped in opening and closing brackets. 
+    * @param contents A callback function that writes the contents.
+    */
+    public writeDecoratorCodeBlock(decoratorName: string, contents: (writer: TypeScriptWriter) => void): void {
+        this.writeLine(`@${decoratorName}({`);
+        this.increaseIndent();
+        if (contents) contents(this);
+        this.decreaseIndent();
+        this.writeLine('})');
+    }
+
+    /**
     * Writes an indented block of code, wrapped in opening and closing brackets. 
     * @param contents A callback function that writes the contents.
     */
-    public writeCodeBlock(contents: (writer: TypeScriptWriter) => void) {
+    public writeCodeBlock(contents: (writer: TypeScriptWriter) => void): void {
         this.writeLine('{');
         this.increaseIndent();
         if (contents) contents(this);
@@ -32,36 +70,55 @@ export class TypeScriptWriter extends CodeWriter {
     };
 
     /**
+    * Writes a block of code, wrapped in a class declaration and opening and closing brackets. 
+    * This function does not write class members.
+    * @param definition The class definition.   
+    * @param contents A callback function that writes the class contents.   
+    */
+    public writeClassBlock(cls: ClassDefinition, contents: (writer: TypeScriptWriter) => void): void
+    /**
      * Writes a block of code, wrapped in a class declaration and opening and closing brackets. 
-     * This function does not write class members.
-     * @param cls The class.
-     * @param contents A callback function that writes the class contents.
-     * @param options An optional ClassOptions object.
-     */
-    public writeClassBlock(cls: elements.Class, contents: (writer: TypeScriptWriter, cls: elements.Class) => void, options?: opts.ClassOptions) {
+    * This function does not write class members.   
+    * @param type A model type from which to create the class block.
+    * @param contents A callback function that writes the class contents.
+    * @param options An optional ClassOptions object.
+    */
+    public writeClassBlock(cls: elements.Type, contents: (writer: TypeScriptWriter) => void, options?: opts.ClassOptions): void
+    public writeClassBlock(cls: any, contents: (writer: TypeScriptWriter) => void, options?: opts.ClassOptions): void {
         if (!cls) return;
-        if (!options) options = {};
 
-        const features = (options.features === undefined) ? opts.ClassFeatures.All : options.features;
-        if (features & opts.ClassFeatures.JsDocDescription) {
-            this.writeJsDocDescription(cls.ownedComments);
+        let definition: ClassDefinition;
+        if (elements.isType(cls)) {
+            definition = TypeScriptModelBuilder.buildClassDefinition(cls, options);
+        }
+        else definition = cls;
+
+        if (definition.description) {
+            this.writeJsDocDescription(definition.description);
         }
         this.writeIndent();
-        if (options.prefix) {
-            this.write(`${options.prefix.trim()} `);
+        if (definition.export) {
+            this.write(`export `);
         }
-        if (cls.isAbstract) {
+        if (definition.declare) {
+            this.write('declare ');
+        }
+        if (definition.isAbstract) {
             this.write('abstract ');
         }
-        this.write(`class ${cls.name}`);
-        if (features & opts.ClassFeatures.Generalizations) {
-            this.writeGeneralizations(cls.generalizations, options.inherits);
+        this.write(`class ${definition.name}`);
+        if (definition.extends) {
+            this.writeExtends(definition.extends);
         }
-        if (features & opts.ClassFeatures.InterfaceRealizations) {
-            this.writeInterfaceRealizations(cls.interfaceRealizations, options.implements);
+        if (definition.implements) {
+            this.writeImplements(definition.implements);
         }
-        this.writeEndOfLine();
-        this.writeCodeBlock((writer) => { contents(writer, cls) });
+        // Write the contents
+        this.writeEndOfLine(' {');
+        this.increaseIndent();
+        if (contents) contents(this);
+        this.decreaseIndent();
+        this.writeLine('}');
     }
 
     /**
@@ -71,24 +128,47 @@ export class TypeScriptWriter extends CodeWriter {
       * @param contents A callback function that writes the interface contents.
       * @param options An optional InterfaceOptions object.
       */
-    public writeInterfaceBlock(iface: elements.Interface, contents: (writer: TypeScriptWriter, cls: elements.Interface) => void, options?: opts.InterfaceOptions) {
+     public writeInterfaceBlock(iface: InterfaceDefinition, contents: (writer: TypeScriptWriter) => void): void 
+     /**
+      * Writes a block of code, wrapped in an interface declaration and opening and closing brackets. 
+      * This function does not write interface members.
+      * @param type A model type from which to create the interface block.
+      * @param contents A callback function that writes the interface contents.
+      * @param options An optional InterfaceOptions object.
+      */
+     public writeInterfaceBlock(iface: elements.Type, contents: (writer: TypeScriptWriter) => void, options?: opts.InterfaceOptions): void
+     public writeInterfaceBlock(iface: any, contents: (writer: TypeScriptWriter) => void, options?: opts.InterfaceOptions): void {
         if (!iface) return;
-        if (!options) options = {};
-
-        const features = (options.features === undefined) ? opts.InterfaceFeatures.All : options.features;
-        if (features & opts.InterfaceFeatures.JsDocDescription) {
-            this.writeJsDocDescription(iface.ownedComments);
+        
+        let definition: InterfaceDefinition;
+        if (elements.isType(iface)) {
+            definition = TypeScriptModelBuilder.buildInterfaceDefinition(iface, options);
+        }
+        else definition = iface;
+        
+        if (definition.description) {
+            this.writeJsDocDescription(definition.description);
         }
         this.writeIndent();
-        if (options.prefix) {
-            this.write(`${options.prefix.trim()} `);
+        if (definition.export) {
+            this.write(`export `);
         }
-        this.write(`interface ${iface.name}`);
-        if (features & opts.InterfaceFeatures.Generalizations) {
-            this.writeGeneralizations(iface.generalizations, options.inherits);
+        if (definition.declare) {
+            this.write('declare ');
+        }
+      
+        this.write(`interface ${definition.name}`);
+        if (definition.extends) {
+            this.writeExtends(definition.extends);
         }
         this.writeEndOfLine();
-        this.writeCodeBlock((writer) => { contents(writer, iface) });
+
+        // Write the contents
+        this.writeEndOfLine(' {');
+        this.increaseIndent();
+        if (contents) contents(this);
+        this.decreaseIndent();
+        this.writeLine('}');
     }
 
     /**
@@ -96,7 +176,7 @@ export class TypeScriptWriter extends CodeWriter {
      * @param property The property to write.
      * @param options An optional PropertyOptions object.
      */
-    public writeProperty(property: elements.Property, options?: opts.PropertyOptions) {
+    public writeProperty(property: elements.Property, options?: opts.PropertyOptions): void {
         if (!property) return;
         if (!options) options = {};
 
@@ -321,34 +401,20 @@ export class TypeScriptWriter extends CodeWriter {
         this.writeWhiteSpace();
     }
 
-    private writeGeneralizations(generalizations: elements.Generalization[], additional: string[] | undefined): void {
-        const allNames: string[] = [];
-        if (generalizations) {
-            allNames.push(...generalizations.map(g => g.general.name));
-        }
-        if (additional) {
-            allNames.push(...additional);
-        }
-        if (allNames.length === 0)
+    private writeExtends(ext: string[]): void {       
+        if (ext.length === 0)
             return;
 
         this.write(' extends ');
-        this.joinWrite(allNames, ', ', name => name);
+        this.joinWrite(ext, ', ', name => name);
     }
 
-    private writeInterfaceRealizations(realizations: elements.InterfaceRealization[], additional: string[] | undefined): void {
-        const allNames: string[] = [];
-        if (realizations) {
-            allNames.push(...realizations.map(ir => ir.contract.name));
-        }
-        if (additional) {
-            allNames.push(...additional);
-        }
-        if (allNames.length === 0)
+    private writeImplements(impl: string[]): void {
+        if (impl.length === 0)
             return;
 
         this.write(' implements ');
-        this.joinWrite(allNames, ', ', name => name);
+        this.joinWrite(impl, ', ', name => name);
     }
 
     private pushJsDocLinesFromComments(comments: elements.Comment[], lines: string[]): void {
@@ -397,7 +463,6 @@ export class TypeScriptWriter extends CodeWriter {
         }
         return line;
     }
-
 
     public writeJsDocDescription(comments: elements.Comment[]): void
     public writeJsDocDescription(text: string): void
@@ -451,7 +516,7 @@ export class TypeScriptWriter extends CodeWriter {
 
     private getTypeName(typedElement: elements.TypedElement | null): string | null {
         if (!typedElement) return null;
-        return this.typeNameProvider ? this.typeNameProvider.getTypeName(typedElement) : typedElement.getTypeName();        
+        return this.typeNameProvider ? this.typeNameProvider.getTypeName(typedElement) : typedElement.getTypeName();
     }
 
     private joinWrite<TItem>(collection: TItem[], separator: string, getStringFunc: (item: TItem) => string | null) {
@@ -465,5 +530,25 @@ export class TypeScriptWriter extends CodeWriter {
             else this.write(separator);
             this.write(value);
         });
+    }
+
+    /**
+     * Makes a TypeScript safe alias for a ES6 module name.     
+     */
+    private static makeSafeModuleName(moduleName: string): string {
+        if (moduleName.startsWith('@')) {
+            moduleName = moduleName.substring(1);
+        }
+        const parts = moduleName.split('/');
+        if (parts.length > 1) {
+            // Make the module name lowerCamelCase, e.g. rename myScope/myModule to myScopeMyModule
+            moduleName = NameUtility.upperToLowerCamelCase(parts[0]);
+            parts.forEach((p, i) => {
+                if (i > 0) {
+                    moduleName += NameUtility.lowerToUpperCamelCase(p);
+                }
+            })
+        }
+        return moduleName;
     }
 }
