@@ -1,11 +1,11 @@
 {
   "name": "@yellicode/typescript",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "TypeScript extension for Yellicode - an extensible code generator.",
   "keywords": [
     "code generator",
     "code generation",
-    "TypeScript"    
+    "TypeScript"
   ],
   "license": "MIT",
   "main": "dist/bundles/typescript.umd.js",
