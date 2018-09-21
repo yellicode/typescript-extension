@@ -34,7 +34,11 @@ export class TypeScriptWriter extends CodeWriter {
         if (!moduleName)
             return;
 
+        // Ensure forward slashes in the module name
+        moduleName = moduleName.replace(/\\/g,"/");
+        
         if (x instanceof Array) {
+            if (x.length === 0) return;
             this.writeLine(`import { ${x.join(', ')} } from '${moduleName}';`);
             return;
         }
