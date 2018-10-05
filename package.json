@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@yellicode/elements": "^0.2.1",
-    "@yellicode/templating": "^0.3.1"
+    "@yellicode/templating": "^0.3.3"
   },
   "devDependencies": {
     "rollup": "^0.50.0"
