@@ -17,11 +17,11 @@
     "url": "github:yellicode/typescript-extension.git"
   },
   "dependencies": {
-    "@yellicode/elements": "^0.2.1",
-    "@yellicode/templating": "^0.3.3"
+    "@yellicode/elements": "^1.0.0",
+    "@yellicode/templating": "^1.0.0"
   },
   "devDependencies": {
-    "rollup": "^0.50.0"
+    "rollup": "^0.66.6"
   },
   "scripts": {
     "build:es5": "tsc",
