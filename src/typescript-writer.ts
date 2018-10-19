@@ -3,7 +3,7 @@ import * as opts from './options';
 
 import { CodeWriter, TextWriter, CodeWriterUtility, TypeNameProvider, NameUtility } from '@yellicode/templating';
 import { TypeScriptTypeNameProvider } from './typescript-type-name-provider';
-import { ClassDefinition, InterfaceDefinition } from './model';
+import { ClassDefinition, InterfaceDefinition, EnumDefinition } from './model';
 import { TypeScriptModelBuilder } from './model-builder';
 
 /**
@@ -98,7 +98,7 @@ export class TypeScriptWriter extends CodeWriter {
         else definition = cls;
 
         if (definition.description) {
-            this.writeJsDocDescription(definition.description);
+            this.writeJsDocLines(definition.description);
         }
         this.writeIndent();
         if (definition.export) {
@@ -129,8 +129,7 @@ export class TypeScriptWriter extends CodeWriter {
       * Writes a block of code, wrapped in an interface declaration and opening and closing brackets. 
       * This function does not write interface members.
       * @param iface The interface.
-      * @param contents A callback function that writes the interface contents.
-      * @param options An optional InterfaceOptions object.
+      * @param contents A callback function that writes the interface contents.     
       */
      public writeInterfaceBlock(iface: InterfaceDefinition, contents: (writer: TypeScriptWriter) => void): void 
      /**
@@ -151,7 +150,7 @@ export class TypeScriptWriter extends CodeWriter {
         else definition = iface;
         
         if (definition.description) {
-            this.writeJsDocDescription(definition.description);
+            this.writeJsDocLines(definition.description);
         }
         this.writeIndent();
         if (definition.export) {
@@ -221,43 +220,53 @@ export class TypeScriptWriter extends CodeWriter {
         this.writeEndOfLine(';');
     }
 
-    /**
+     /**
+     * Writes a full enumeration, including members.   
+     * @param element The enumeration.          
+     */
+    public writeEnumeration(enumeration: EnumDefinition): void
+     /**
      * Writes a full enumeration, including members.   
      * @param element The enumeration.     
      * @param options An optional EnumerationOptions object.
      */
-    public writeEnumeration(enumeration: elements.Enumeration, options: opts.EnumOptions): void {
-        if (!enumeration) return;
-        if (!options) options = {};
-        const features = (options.features === undefined) ? opts.EnumFeatures.All : options.features;
+    public writeEnumeration(enumeration: elements.Enumeration, options?: opts.EnumOptions): void 
+    public writeEnumeration(enumeration: any, options?: opts.EnumOptions): void {
+        if (!enumeration) return;        
 
-        if (features & opts.EnumFeatures.JsDocDescription) {
-            this.writeJsDocDescription(enumeration.ownedComments);
+        let definition: EnumDefinition;
+        if (elements.isType(enumeration)) {
+            definition = TypeScriptModelBuilder.buildEnumDefinition(enumeration, options);
         }
-        this.writeIndent();
-        if (options.prefix) {
-            this.write(`${options.prefix.trim()} `);
+        else definition = enumeration;
+
+        if (definition.description) {
+            this.writeJsDocLines(definition.description);
+        }
+        this.writeIndent();        
+        if (definition.export) {
+            this.write(`export `);
+        }
+        if (definition.declare) {
+            this.write('declare ');
         }
 
         this.write(`enum ${enumeration.name}`);
         this.writeEndOfLine();
-        this.writeCodeBlock(() => {
-            let literals = enumeration.ownedLiterals;
-            if (!literals)
+        this.writeCodeBlock(() => {            
+            if (!definition.members)
                 return;
 
-            for (let i = 0, len = literals.length; i < len; i++) {
-                const literal = literals[i];
-                if (features & opts.EnumFeatures.JsDocDescription) {
-                    this.writeJsDocDescription(literal.ownedComments);
+            for (let i = 0, len = definition.members.length; i < len; i++) {
+                const member = definition.members[i];
+                if (member.description) {
+                    this.writeJsDocLines(member.description);
                 }
                 this.writeIndent();
-                this.write(literal.name);
-                if ((features & opts.EnumFeatures.Initializers) && literal.specification) {
-                    let initialValue = literal.specification.getStringValue();
-                    if (elements.isLiteralString(literal.specification)) {
-                        initialValue = `'${initialValue}'`; // a string enum: wrap in quotes
-                    }
+                this.write(member.name);
+                if (member.value) {
+                    const initialValue = (typeof member.value === "number") ?
+                        member.value.toString() : `'${member.value}'`; // a string enum: wrap in quotes
                     this.write(` = ${initialValue}`);
                 }
                 if (i < len - 1) {
@@ -267,7 +276,7 @@ export class TypeScriptWriter extends CodeWriter {
             }
         });
     }
-
+    
     /**
      * Writes a string literal type from a specified enumeration. Example: 'type Easing = 'ease-in' | 'ease-out' | 'ease-in-out';'     
      * @param enumeration The enumeration.     

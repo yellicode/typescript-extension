@@ -41,7 +41,22 @@ export enum EnumFeatures {
 
 export interface EnumOptions {
     features?: EnumFeatures;
-    prefix?: string;
+     /**
+     * Indicates if the class must be exported or not (using the 'export' keyword).
+     * By default, the class is exported only if it has public or package visibility.
+     */
+    export?: boolean;
+    /**
+     * True if the class definition should contain the 'declare' keyword.
+     */
+    declare?: boolean;
+    /** 
+    * Any string to prefix the enum keyword with, such as "export".
+    * Indicates if the class must be exported or not (using the 'export' keyword).
+    * By default, the class is exported only if it has public or package visibility.    
+    * @deprecated Use the 'export' or 'declare' option instead.
+    */
+    prefix?: string;    
 }
 
 export enum ClassFeatures {

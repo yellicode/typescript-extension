@@ -1,5 +1,5 @@
 import * as elements from '@yellicode/elements';
-import { ClassDefinition, InterfaceDefinition } from './model';
+import { ClassDefinition, InterfaceDefinition, EnumDefinition, EnumMemberDefinition } from './model';
 import * as opts from './options';
 
 export class TypeScriptModelBuilder {
@@ -22,7 +22,7 @@ export class TypeScriptModelBuilder {
 
         // Description
         if ((features & opts.ClassFeatures.JsDocDescription) && type.ownedComments) {
-            definition.description = type.ownedComments.map(c => c.body).join(' ');
+            definition.description = TypeScriptModelBuilder.buildDescription(type);
         }
 
         // Generalizations
@@ -72,7 +72,7 @@ export class TypeScriptModelBuilder {
 
         // Description
         if ((features & opts.InterfaceFeatures.JsDocDescription) && type.ownedComments) {
-            definition.description = type.ownedComments.map(c => c.body).join(' ');
+            definition.description = TypeScriptModelBuilder.buildDescription(type);
         }
 
         // Generalizations
@@ -90,6 +90,61 @@ export class TypeScriptModelBuilder {
             definition.export = type.visibility === elements.VisibilityKind.public || type.visibility === elements.VisibilityKind.package;
         }
         else definition.export = options.export;
+        return definition;
+    }
+
+    public static buildEnumDefinition(type: elements.Type, options?: opts.EnumOptions): EnumDefinition {
+        if (!options) options = {};
+
+        const definition: EnumDefinition = { name: type.name };
+        const features = (options.features === undefined) ? opts.EnumFeatures.All : options.features;
+
+        // Handle deprecated stuff
+        if (options.prefix) {
+            console.warn(`The 'prefix' option is deprecated. Use the 'export' or 'declare' option instead.`)
+            if (options.prefix === 'export') {
+                options.export = true;
+            }
+            else if (options.prefix === 'declare') {
+                options.declare = true;
+            }
+        }
+
+        // Description
+        if ((features & opts.EnumFeatures.JsDocDescription) && type.ownedComments) {
+            definition.description = TypeScriptModelBuilder.buildDescription(type);
+        }
+
+        // Declare
+        definition.declare = options.declare;
+
+        // Export
+        if (options.export == undefined) {
+            definition.export = type.visibility === elements.VisibilityKind.public || type.visibility === elements.VisibilityKind.package;
+        }
+        else definition.export = options.export;
+
+        // Literals
+        if (elements.isEnumeration(type) && type.ownedLiterals && type.ownedLiterals.length){
+            const members: EnumMemberDefinition[] = [];
+            const buildInitializers = !!(features & opts.EnumFeatures.Initializers);            
+            type.ownedLiterals.forEach(literal => {
+                const member: EnumMemberDefinition = {name: literal.name};
+                if (features & opts.EnumFeatures.JsDocDescription) {
+                    member.description = TypeScriptModelBuilder.buildDescription(literal);
+                }                
+                if (buildInitializers && literal.specification) {
+                    const specification = literal.specification;
+                    member.value = elements.isLiteralInteger(specification) 
+                        ? specification.value 
+                        : specification.getStringValue(); 
+                }
+                members.push(member);
+            });           
+          
+            definition.members = members;
+        }
+
         return definition;
     }
 
@@ -113,5 +168,9 @@ export class TypeScriptModelBuilder {
             allNames.push(...additional);
         }
         return allNames;
+    }
+
+    private static buildDescription(type: elements.Element): string[] {
+        return type.ownedComments.map(c => c.body);
     }
 }
