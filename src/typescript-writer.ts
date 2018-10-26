@@ -164,8 +164,7 @@ export class TypeScriptWriter extends CodeWriter {
         if (definition.extends) {
             this.writeExtends(definition.extends);
         }
-        this.writeEndOfLine();
-
+        
         // Write the contents
         this.writeEndOfLine(' {');
         this.increaseIndent();
@@ -322,6 +321,32 @@ export class TypeScriptWriter extends CodeWriter {
         this.writeCodeBlock((writer) => { contents(writer, operation) });
     }
 
+    
+    /**
+     * Gets the name of the type. This function uses the current typeNameProvider for resolving
+     * the type name.
+     * @param type Any element that derives from Type.
+     */
+    public getTypeName(type: elements.Type | null): string | null;
+     /**
+     * Gets the type name of the typed element. This function uses the current typeNameProvider for resolving
+     * the type name.
+     * @param typedElement Any element that has a type, such as a Property or Parameter.
+     */
+    public getTypeName(typedElement: elements.TypedElement | null): string | null;
+    public getTypeName(element: any | null): string | null {
+        if (!element) 
+            return null;
+
+        if (elements.isTypedElement(element)){
+            return this.typeNameProvider ? this.typeNameProvider.getTypeName(element) : element.getTypeName();
+        }
+        else if (elements.isType(element)) {
+            return this.typeNameProvider ? this.typeNameProvider.getTypeName(element) : element.name;
+        }
+        return null;
+    }
+    
     private writeFunctionStart(operation: elements.Operation, options?: opts.FunctionOptions): void {
         if (!operation) return;
         if (!options) options = {};
@@ -525,11 +550,6 @@ export class TypeScriptWriter extends CodeWriter {
             default:
                 return null;
         }
-    }
-
-    private getTypeName(typedElement: elements.TypedElement | null): string | null {
-        if (!typedElement) return null;
-        return this.typeNameProvider ? this.typeNameProvider.getTypeName(typedElement) : typedElement.getTypeName();
     }
 
     private joinWrite<TItem>(collection: TItem[], separator: string, getStringFunc: (item: TItem) => string | null) {
