@@ -5,6 +5,8 @@ import { CodeWriter, TextWriter, CodeWriterUtility, TypeNameProvider, NameUtilit
 import { TypeScriptTypeNameProvider } from './typescript-type-name-provider';
 import { ClassDefinition, InterfaceDefinition, EnumDefinition } from './model';
 import { TypeScriptModelBuilder } from './model-builder';
+import { TypeUtility } from './type-utility';
+import { MultiplicityElement } from '@yellicode/elements';
 
 /**
  * Provides code writing functionality specific for TypeScript. 
@@ -184,7 +186,7 @@ export class TypeScriptWriter extends CodeWriter {
 
         const features = (options.features === undefined) ? opts.PropertyFeatures.All : options.features;
         const optionalityModifier = (options.optionality === undefined) ? opts.OptionalityModifier.QuestionToken : options.optionality;
-        const makeOptional = property.isOptional() && (features & opts.PropertyFeatures.OptionalModifier);
+        const makeOptional = property.isOptional() ? !!(features & opts.PropertyFeatures.OptionalModifier) : false;
 
         if (features & opts.PropertyFeatures.JsDocDescription) {
             this.writeJsDocDescription(property.ownedComments);
@@ -204,18 +206,23 @@ export class TypeScriptWriter extends CodeWriter {
         if (makeOptional && (optionalityModifier & opts.OptionalityModifier.QuestionToken)) {
             this.write('?');
         }
-        // The type        
-        this.write(`: ${this.getTypeName(property) || 'any'}`);
+        // The type  
+        const typeName = this.getTypeName(property);    
+        this.write(`: ${typeName || 'any'}`);
         if (property.isMultivalued()) {
             this.write('[]');
         }
         if (makeOptional && (optionalityModifier & opts.OptionalityModifier.NullKeyword)) {
             this.write(' | null');
         }
-        // TODO: Initializer if not an interface and the model has a default value (but should have a some optional value conversion hook, primitives only)
-        // if ((features & opts.PropertyFeatures.Initializer) && !model.isInterface(property.owner)) {
 
-        // }
+        // Initializer if not an interface and the model has a default value
+        if ((features & opts.PropertyFeatures.Initializer) && !elements.isInterface(property.owner)) {           
+            const defaultValueString = TypeScriptModelBuilder.getDefaultValueString(property, typeName, property.defaultValue, makeOptional, optionalityModifier, options.initializePrimitiveType, options.initializeArray);
+            if (defaultValueString != null) {
+                this.write(` = ${defaultValueString}`);
+            }
+        }
         this.writeEndOfLine(';');
     }
 

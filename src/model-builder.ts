@@ -1,6 +1,7 @@
 import * as elements from '@yellicode/elements';
 import { ClassDefinition, InterfaceDefinition, EnumDefinition, EnumMemberDefinition } from './model';
 import * as opts from './options';
+import { TypeUtility } from './type-utility';
 
 export class TypeScriptModelBuilder {
     public static buildClassDefinition(type: elements.Type, options?: opts.ClassOptions): ClassDefinition {
@@ -125,23 +126,23 @@ export class TypeScriptModelBuilder {
         else definition.export = options.export;
 
         // Literals
-        if (elements.isEnumeration(type) && type.ownedLiterals && type.ownedLiterals.length){
+        if (elements.isEnumeration(type) && type.ownedLiterals && type.ownedLiterals.length) {
             const members: EnumMemberDefinition[] = [];
-            const buildInitializers = !!(features & opts.EnumFeatures.Initializers);            
+            const buildInitializers = !!(features & opts.EnumFeatures.Initializers);
             type.ownedLiterals.forEach(literal => {
-                const member: EnumMemberDefinition = {name: literal.name};
+                const member: EnumMemberDefinition = { name: literal.name };
                 if (features & opts.EnumFeatures.JsDocDescription) {
                     member.description = TypeScriptModelBuilder.buildDescription(literal);
-                }                
+                }
                 if (buildInitializers && literal.specification) {
                     const specification = literal.specification;
-                    member.value = elements.isLiteralInteger(specification) 
-                        ? specification.value 
-                        : specification.getStringValue(); 
+                    member.value = elements.isLiteralInteger(specification)
+                        ? specification.value
+                        : specification.getStringValue();
                 }
                 members.push(member);
-            });           
-          
+            });
+
             definition.members = members;
         }
 
@@ -172,5 +173,50 @@ export class TypeScriptModelBuilder {
 
     private static buildDescription(type: elements.Element): string[] {
         return type.ownedComments.map(c => c.body);
+    }
+
+    public static getDefaultValueString(
+        element: elements.MultiplicityElement,
+        typeName: string | null,
+        defaultValue: elements.ValueSpecification | null,
+        isOptional: boolean,
+        optionalityModifier: opts.OptionalityModifier,
+        initializePrimitiveType?: boolean,
+        initializeArray?: boolean,
+    ): string | null {
+
+        const isPrimitive = TypeUtility.isPrimitiveType(typeName);      
+        const valueIfOptional: string | null = optionalityModifier == opts.OptionalityModifier.NullKeyword ? 'null' : null;
+
+        if (element.isMultivalued()) {       
+            // The element is an array (of a complex type or a primitive)
+            if (initializeArray) {
+                return isOptional ? valueIfOptional : '[]';
+            }
+            else return null;
+        }
+
+        else if (isPrimitive) {
+            if (defaultValue) {
+                // The type is a primitive having a default value in the model
+                return elements.isLiteralString(defaultValue) ? `'${defaultValue.value}'` : defaultValue.getStringValue();
+            }
+            else if (initializePrimitiveType) {
+                // The type is a primitive having no default value in the model
+                if (isOptional) {
+                    return valueIfOptional;
+                }
+                // A required primitive element without default
+                else return TypeUtility.getPrimitiveTypeDefault(typeName);
+            }
+        }
+        else {
+            // The element is not a primitive and no array, so it is a complex type.
+            // If optionalityModifier is NullKeyword, use it.
+            if (isOptional && optionalityModifier == opts.OptionalityModifier.NullKeyword) {
+                return valueIfOptional;
+            }
+        }
+        return null;
     }
 }

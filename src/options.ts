@@ -139,10 +139,11 @@ export enum PropertyFeatures {
     JsDocDescription = 1 << 0,
     AccessModifier = 1 << 1,
     ReadonlyModifier = 1 << 2,
-    OptionalModifier = 1 << 3,
-    // Initializer = 1 << 4,
-    All = JsDocDescription | AccessModifier | ReadonlyModifier | OptionalModifier /*| Initializer */,
-    AllExceptJsDoc = AccessModifier | ReadonlyModifier | OptionalModifier /* | Initializer*/
+    OptionalModifier = 1 << 3,    
+    Initializer = 1 << 4,
+    All = JsDocDescription | AccessModifier | ReadonlyModifier | OptionalModifier | Initializer,
+    AllExceptJsDoc = All & ~JsDocDescription,
+    AllExceptOptionalModifier = All & ~OptionalModifier
 }
 
 export interface PropertyOptions {
@@ -154,6 +155,17 @@ export interface PropertyOptions {
      * Indicates how to deal with properties that have a lower bound of 0. The default is OptionalityModifier.QuestionToken.
      */
     optionality?: OptionalityModifier;
+    /**
+    * Set to true to initialize an array property with an empty array, or with null if the property is optional (has a lower bound of 0) 
+    * and optionality is OptionalityModifier.NullKeyword. The default value is false.
+    */
+    initializeArray?: boolean;
+    /**
+     * Set to true to initialize a primitive property (Boolean, Number and String) with the type's default value (false, 0 and '') in case it is required and
+     * doesn't have a default value in the model. If the property doesn't have a default value in the model, is optional and optionality is 
+     * OptionalityModifier.NullKeyword, the property will be initialized with 'null'. The default value is false.
+     */
+    initializePrimitiveType?: boolean;
 }
 
 export enum FunctionFeatures {
