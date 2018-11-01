@@ -294,11 +294,17 @@ export class TypeScriptWriter extends CodeWriter {
      * @param enumeration The enumeration.     
      * @param prefix An optional prefix, such as 'export'.
      */
-    public writeStringLiteralType(enumeration: elements.Enumeration, prefix?: string): void {
+    public writeStringLiteralType(enumeration: elements.Enumeration, options?: opts.StringLiteralOptions): void {
+        if (!enumeration) return;
+        if (!options) options = {};
+
         this.writeJsDocDescription(enumeration.ownedComments);
         this.writeIndent();
-        if (prefix && prefix.length > 0) {
-            this.write(`${prefix.trim()} `);
+        if (options.export) {
+            this.write(`export `);
+        }
+        if (options.declare) {
+            this.write('declare ');
         }
         this.write(`type ${enumeration.name} = `);
         this.joinWrite(enumeration.ownedLiterals, ' | ', lit => `'${lit.name}'`);

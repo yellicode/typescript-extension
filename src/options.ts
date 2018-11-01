@@ -58,6 +58,18 @@ export interface EnumOptions {
     prefix?: string;    
 }
 
+export interface StringLiteralOptions {
+   /**
+     * Indicates if the literal must be exported or not (using the 'export' keyword).
+     * By default, the literal is exported only if the enum has public or package visibility.
+     */
+    export?: boolean;
+    /**
+     * True if the literal definition should contain the 'declare' keyword.
+     */
+    declare?: boolean;
+}
+
 export enum ClassFeatures {
     None = 0,
     JsDocDescription = 1 << 0,
