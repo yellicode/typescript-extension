@@ -2,17 +2,17 @@
 import { DefaultTypeNameProvider } from '@yellicode/templating';
 
 export class TypeScriptTypeNameProvider extends DefaultTypeNameProvider {
-    protected /*override*/ getDataTypeName(typedElement: elements.TypedElement): string | null {
-        if (!typedElement.type)
+    
+    protected /*override*/ getDataTypeNameForType(type: elements.Type | null): string | null {
+        if (!type)
             return null;
-
-        const t = typedElement.type;
-        if (elements.isPrimitiveBoolean(t)) return "boolean";
-        if (elements.isPrimitiveInteger(t) || elements.isPrimitiveReal(t))
+        
+        if (elements.isPrimitiveBoolean(type)) return "boolean";
+        if (elements.isPrimitiveInteger(type) || elements.isPrimitiveReal(type))
             return "number";
-        if (elements.isPrimitiveString(t)) return "string";
-        if (elements.isPrimitiveObject(t)) return "any";
+        if (elements.isPrimitiveString(type)) return "string";
+        if (elements.isPrimitiveObject(type)) return "any";
 
-        return super.getDataTypeName(typedElement);
+        return super.getDataTypeNameForType(type);
     }
 }
