@@ -35,8 +35,7 @@ export enum EnumFeatures {
     None = 0,
     JsDocDescription = 1 << 0,
     Initializers = 1 << 1,
-    All = JsDocDescription | Initializers,
-    AllExceptJsDoc = Initializers
+    All = JsDocDescription | Initializers    
 }
 
 export interface EnumOptions {
@@ -64,8 +63,7 @@ export enum ClassFeatures {
     JsDocDescription = 1 << 0,
     Generalizations = 1 << 1,
     InterfaceRealizations = 1 << 2,
-    All = JsDocDescription | Generalizations | InterfaceRealizations,
-    AllExceptJsDoc = Generalizations | InterfaceRealizations
+    All = JsDocDescription | Generalizations | InterfaceRealizations 
 }
 
 export interface ClassOptions {
@@ -103,8 +101,7 @@ export enum InterfaceFeatures {
     None = 0,
     JsDocDescription = 1 << 0,
     Generalizations = 1 << 1,
-    All = JsDocDescription | Generalizations,
-    AllExceptJsDoc = Generalizations
+    All = JsDocDescription | Generalizations 
 }
 
 export interface InterfaceOptions {
@@ -141,9 +138,7 @@ export enum PropertyFeatures {
     ReadonlyModifier = 1 << 2,
     OptionalModifier = 1 << 3,    
     Initializer = 1 << 4,
-    All = JsDocDescription | AccessModifier | ReadonlyModifier | OptionalModifier | Initializer,
-    AllExceptJsDoc = All & ~JsDocDescription,
-    AllExceptOptionalModifier = All & ~OptionalModifier
+    All = JsDocDescription | AccessModifier | ReadonlyModifier | OptionalModifier | Initializer    
 }
 
 export interface PropertyOptions {
@@ -169,17 +164,25 @@ export interface PropertyOptions {
 }
 
 export enum FunctionFeatures {
-    None = 0,
-    Comments = 1 << 0,
-    JsDocDescription = 1 << 1,
-    JsDocParameters = 1 << 2,
-    AccessModifier = 1 << 3,
-    All = Comments | JsDocDescription | JsDocParameters | AccessModifier,
-    AllExceptJsDoc = AccessModifier
+    None = 0,  
+    JsDocDescription = 1 << 0,    
+    AccessModifier = 1 << 1,
+    OptionalModifier = 1 << 2,    
+    All = JsDocDescription | AccessModifier | OptionalModifier
+}
+
+export enum ParameterFeatures {
+    None = 0,    
+    JsDocDescription = 1 << 0,       
+    OptionalModifier = 1 << 1,    
+    All = JsDocDescription | OptionalModifier 
 }
 
 export interface FunctionOptions {
     features?: FunctionFeatures;
+    
+    parameterFeatures?: ParameterFeatures;
+
     /**
      * Indicates what to write when the return parameter has a lower bound of 0. The default is OptionalityModifier.NullKeyword.
      */

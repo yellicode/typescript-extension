@@ -358,13 +358,14 @@ export class TypeScriptWriter extends CodeWriter {
         if (!operation) return;
         if (!options) options = {};
         const features = (options.features === undefined) ? opts.FunctionFeatures.All : options.features;
+        const paramFeatures = (options.parameterFeatures === undefined) ? opts.ParameterFeatures.All : options.parameterFeatures;
 
         // jsDoc tags 
         var jsDocLines: string[] = [];
         if (features & opts.FunctionFeatures.JsDocDescription) {
             this.pushJsDocLinesFromComments(operation.ownedComments, jsDocLines);
         }
-        if (features & opts.FunctionFeatures.JsDocParameters) {
+        if (paramFeatures & opts.ParameterFeatures.JsDocDescription) {
             this.pushJsDocLinesForParameters(operation.ownedParameters, jsDocLines);
         }
         this.writeJsDocLines(jsDocLines);
@@ -382,13 +383,13 @@ export class TypeScriptWriter extends CodeWriter {
         this.write(operation.name);
         // If needed, make the function optional using the '?'   
         const returnParameter = operation.getReturnParameter();
-        const optionalityModifier = (options.returnOptionality === undefined) ? opts.OptionalityModifier.NullKeyword : options.returnOptionality;
-        const makeOptional = (returnParameter && returnParameter.isOptional());
+        const optionalityModifier = (options.returnOptionality === undefined) ? opts.OptionalityModifier.NullKeyword : options.returnOptionality;        
+        const makeOptional = (returnParameter && returnParameter.isOptional()) ? !!(features & opts.FunctionFeatures.OptionalModifier) : false;
         if (makeOptional && (optionalityModifier & opts.OptionalityModifier.QuestionToken)) {
             this.write('?');
         }
         this.write('(');
-        this.writeInOutParameters(operation.ownedParameters, options.parameterOptionality);
+        this.writeInOutParameters(operation.ownedParameters, paramFeatures, options.parameterOptionality);
         this.write('): ');
 
         // Write the return type        
@@ -399,7 +400,7 @@ export class TypeScriptWriter extends CodeWriter {
         }
     }
 
-    private writeInOutParameters(parameters: elements.Parameter[], optionalityModifier?: opts.OptionalityModifier): void {
+    private writeInOutParameters(parameters: elements.Parameter[], features: opts.ParameterFeatures, optionalityModifier?: opts.OptionalityModifier): void {
         if (!elements)
             return;
 
@@ -410,7 +411,8 @@ export class TypeScriptWriter extends CodeWriter {
             if (p.direction === elements.ParameterDirectionKind.return)
                 return;
 
-            const makeOptional = p.isOptional();
+            const makeOptional = p.isOptional() ? !!(features & opts.ParameterFeatures.OptionalModifier) : false;
+
             if (i > 0) {
                 this.write(', ');
             }
