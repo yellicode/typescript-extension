@@ -138,7 +138,13 @@ export enum PropertyFeatures {
     ReadonlyModifier = 1 << 2,
     OptionalModifier = 1 << 3,    
     Initializer = 1 << 4,
-    All = JsDocDescription | AccessModifier | ReadonlyModifier | OptionalModifier | Initializer    
+    /**
+     * Writes the so-called 'definite assignment assertion modifier' for the property if the property is required. 
+     * There are certain scenarios where properties can be initialized indirectly (perhaps by a helper method or dependency injection library), 
+     * in which case you can use the definite assignment assertion modifiers for your properties.
+     */
+    DefiniteAssignmentAssertionModifier = 1 << 5,
+    All = JsDocDescription | AccessModifier | ReadonlyModifier | OptionalModifier | Initializer | DefiniteAssignmentAssertionModifier
 }
 
 export interface PropertyOptions {

@@ -187,6 +187,12 @@ export class TypeScriptWriter extends CodeWriter {
         const features = (options.features === undefined) ? opts.PropertyFeatures.All : options.features;
         const optionalityModifier = (options.optionality === undefined) ? opts.OptionalityModifier.QuestionToken : options.optionality;
         const makeOptional = property.isOptional() ? !!(features & opts.PropertyFeatures.OptionalModifier) : false;
+        const typeName = this.getTypeName(property);    
+        const isOwnedByInterface = elements.isInterface(property.owner);
+        const defaultValueString = ((features & opts.PropertyFeatures.Initializer) && !isOwnedByInterface) ? 
+            TypeScriptModelBuilder.getDefaultValueString(property, typeName, property.defaultValue, makeOptional, optionalityModifier, options.initializePrimitiveType, options.initializeArray):
+            null;        
+
 
         if (features & opts.PropertyFeatures.JsDocDescription) {
             this.writeJsDocDescription(property.ownedComments);
@@ -194,7 +200,7 @@ export class TypeScriptWriter extends CodeWriter {
         // Start a new, indented line        
         this.writeIndent();
         // Access modifier (+ white space)
-        if ((features & opts.PropertyFeatures.AccessModifier) && !elements.isInterface(property.owner)) {
+        if ((features & opts.PropertyFeatures.AccessModifier) && !isOwnedByInterface) {
             this.writeAccessModifier(property.visibility);
         }
         // Readonly modifier
@@ -203,11 +209,14 @@ export class TypeScriptWriter extends CodeWriter {
         }
         // The name
         this.write(property.name);
-        if (makeOptional && (optionalityModifier & opts.OptionalityModifier.QuestionToken)) {
+        if ((optionalityModifier & opts.OptionalityModifier.QuestionToken) && makeOptional) {
             this.write('?');
         }
+        if ((features & opts.PropertyFeatures.DefiniteAssignmentAssertionModifier) && !makeOptional && !defaultValueString && !isOwnedByInterface) {
+            this.write('!'); 
+        }
+
         // The type  
-        const typeName = this.getTypeName(property);    
         this.write(`: ${typeName || 'any'}`);
         if (property.isMultivalued()) {
             this.write('[]');
@@ -217,12 +226,9 @@ export class TypeScriptWriter extends CodeWriter {
         }
 
         // Initializer if not an interface and the model has a default value
-        if ((features & opts.PropertyFeatures.Initializer) && !elements.isInterface(property.owner)) {           
-            const defaultValueString = TypeScriptModelBuilder.getDefaultValueString(property, typeName, property.defaultValue, makeOptional, optionalityModifier, options.initializePrimitiveType, options.initializeArray);
-            if (defaultValueString != null) {
-                this.write(` = ${defaultValueString}`);
-            }
-        }
+        if (defaultValueString != null) {
+            this.write(` = ${defaultValueString}`);
+        }        
         this.writeEndOfLine(';');
     }
 
