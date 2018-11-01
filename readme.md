@@ -14,9 +14,9 @@ Check out [our website](https://www.yellicode.com) for more.
 ### Prerequisites
 In order to run a code generation template, you must have the CLI installed (@yellicode/cli) globally and have a valid *codegenconfig.json* file in your working directory. Please refer to the [installation instructions](https://www.yellicode.com/docs/installation) and the [quick start](https://www.yellicode.com/docs/quickstart) for more.
 
-You should also have the *@yellicode/model* package installed in your working directory:
+You should also have the *@yellicode/elements* package installed in your working directory:
 ```
-npm install @yellicode/model --save-dev
+npm install @yellicode/elements --save-dev
 ```
 
 ### Installation
@@ -30,19 +30,19 @@ npm install @yellicode/typescript --save-dev
 This template generates a TypeScript code file with all classes in the model and, for each class, writes a property for each class attribute.
 
 ```ts
-import * as model from '@yellicode/model';
+import * as elements from '@yellicode/elements';
 import { Generator, TextWriter } from '@yellicode/templating';
 import { TypeScriptWriter } from '@yellicode/typescript';
 
-Generator.generateFromModel({ outputFile: `my-classes.ts` }, (textWriter: TextWriter, pack: model.Package) => {
+Generator.generateFromModel({ outputFile: `my-classes.ts` }, (textWriter: TextWriter, model: elements.Model) => {
     const writer = new TypeScriptWriter(textWriter);   
-    pack.getAllClasses().forEach(c => {
-        writer.writeEndOfLine(); // insert a blank line
+    model.getAllClasses().forEach(c => {
+        writer.writeLine();
         writer.writeClassBlock(c, () => {
             c.ownedAttributes.forEach(att => {
                 writer.writeProperty(att);
             })
-        }, { prefix: 'export' });
+        }, { export: true });
     });
 });    
 ```
