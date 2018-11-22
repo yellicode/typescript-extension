@@ -17,7 +17,7 @@
     "url": "github:yellicode/typescript-extension.git"
   },
   "dependencies": {
-    "@yellicode/elements": "^1.0.1",
+    "@yellicode/elements": "^1.0.2",
     "@yellicode/templating": "^1.0.0"
   },
   "devDependencies": {
