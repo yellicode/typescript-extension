@@ -156,7 +156,11 @@ export enum PropertyFeatures {
      * in which case you can use the definite assignment assertion modifiers for your properties.
      */
     DefiniteAssignmentAssertionModifier = 1 << 5,
-    All = JsDocDescription | AccessModifier | ReadonlyModifier | OptionalModifier | Initializer | DefiniteAssignmentAssertionModifier
+    All = JsDocDescription | AccessModifier | ReadonlyModifier | OptionalModifier | Initializer | DefiniteAssignmentAssertionModifier,
+    /**
+     * Include all features, except the ones that are not usable on interface properties.
+     */
+    AllInterfaceProperty = PropertyFeatures.All & ~PropertyFeatures.AccessModifier & ~PropertyFeatures.Initializer & ~PropertyFeatures.DefiniteAssignmentAssertionModifier 
 }
 
 export interface PropertyOptions {
