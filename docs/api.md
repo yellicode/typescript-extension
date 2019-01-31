@@ -16,6 +16,7 @@
 * [ParameterFeatures](#parameter-features) enumeration
 * [PropertyFeatures](#property-features) enumeration
 * [PropertyOptions](#property-options) interface
+* [StringLiteralOptions](#string-literal-options) interface
 * [TypeDefinition](#type-definition) interface
 * [TypeScriptModelBuilder](#type-script-model-builder) class
 * [TypeScriptWriter](#type-script-writer) class
@@ -178,6 +179,9 @@ Defines options for dealing with elements that are 'optional', meaning that they
 There are certain scenarios where properties can be initialized indirectly (perhaps by a helper method or dependency injection library), 
 in which case you can use the definite assignment assertion modifiers for your properties.
 * All
+* AllInterfaceProperty
+
+   Include all features, except the ones that are not usable on interface properties.
 
 ## <a name="property-options"></a> PropertyOptions interface
 
@@ -192,6 +196,14 @@ doesn't have a default value in the model. If the property doesn't have a defaul
 OptionalityModifier.NullKeyword, the property will be initialized with 'null'. The default value is false.
 ### PropertyOptions.optionality: OptionalityModifier
 Indicates how to deal with properties that have a lower bound of 0. The default is OptionalityModifier.QuestionToken.
+
+## <a name="string-literal-options"></a> StringLiteralOptions interface
+
+### StringLiteralOptions.declare: boolean
+True if the literal definition should contain the 'declare' keyword.
+### StringLiteralOptions.export: boolean
+Indicates if the literal must be exported or not (using the 'export' keyword).
+By default, the literal is exported only if the enum has public or package visibility.
 
 ## <a name="type-definition"></a> TypeDefinition interface
 
@@ -355,14 +367,12 @@ Writes a class or interface property.
 * options: [PropertyOptions](#property-options)
 
    An optional PropertyOptions object.
-### TypeScriptWriter.writeStringLiteralType(enumeration, prefix) : void
+### TypeScriptWriter.writeStringLiteralType(enumeration, options) : void
 Writes a string literal type from a specified enumeration. Example: 'type Easing = 'ease-in' | 'ease-out' | 'ease-in-out';'     
 * enumeration: Enumeration
 
    The enumeration.     
-* prefix: string
-
-   An optional prefix, such as 'export'.
+* options: [StringLiteralOptions](#string-literal-options)
 
 ## <a name="type-utility"></a> TypeUtility class
 
