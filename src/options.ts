@@ -207,8 +207,10 @@ export interface FunctionOptions {
 
     /**
      * Indicates what to write when the return parameter has a lower bound of 0. The default is OptionalityModifier.NullKeyword.
-     */
+     * @deprecated This option is not supported in versions higher than 1.5.1.
+     */    
     returnOptionality?: OptionalityModifier;
+
     /**
      * Indicates what to write when an input parameters has a lower bound of 0. The default is OptionalityModifier.NullKeyword.
      */

@@ -3,16 +3,16 @@ import * as opts from './options';
 
 import { CodeWriter, TextWriter, CodeWriterUtility, TypeNameProvider, NameUtility } from '@yellicode/templating';
 import { TypeScriptTypeNameProvider } from './typescript-type-name-provider';
-import { ClassDefinition, InterfaceDefinition, EnumDefinition } from './model';
-import { TypeScriptModelBuilder } from './model-builder';
-import { TypeUtility } from './type-utility';
-import { MultiplicityElement } from '@yellicode/elements';
+import { ClassDefinition, InterfaceDefinition, EnumDefinition, PropertyDefinition, FunctionDefinition, ParameterDefinition } from './model';
+import { DefinitionBuilder } from './definition-builder';
 
 /**
  * Provides code writing functionality specific for TypeScript. 
  */
 export class TypeScriptWriter extends CodeWriter {
     private typeNameProvider: TypeNameProvider;
+    private definitionBuilder: DefinitionBuilder;
+
     public maxCommentWidth: number;
 
     constructor(writer: TextWriter, options?: opts.WriterOptions) {
@@ -20,7 +20,18 @@ export class TypeScriptWriter extends CodeWriter {
         if (!options) options = {};
 
         this.typeNameProvider = options.typeNameProvider || new TypeScriptTypeNameProvider();
+        this.definitionBuilder = new DefinitionBuilder(this.typeNameProvider);
         this.maxCommentWidth = options.maxCommentWidth || 100;
+    }
+
+    /**
+     * Writes a block of code wrapped in a #region block.      
+     */
+    public writeRegionBlock(name: string, contents: (writer: TypeScriptWriter) => void): this {
+        this.writeLine(`//#region ${name}`);
+        contents(this);
+        this.writeLine(`//#endregion ${name}`);
+        return this;
     }
 
     /**
@@ -37,8 +48,8 @@ export class TypeScriptWriter extends CodeWriter {
             return;
 
         // Ensure forward slashes in the module name
-        moduleName = moduleName.replace(/\\/g,"/");
-        
+        moduleName = moduleName.replace(/\\/g, "/");
+
         if (x instanceof Array) {
             if (x.length === 0) return;
             this.writeLine(`import { ${x.join(', ')} } from '${moduleName}';`);
@@ -95,7 +106,7 @@ export class TypeScriptWriter extends CodeWriter {
 
         let definition: ClassDefinition;
         if (elements.isType(cls)) {
-            definition = TypeScriptModelBuilder.buildClassDefinition(cls, options);
+            definition = this.definitionBuilder.buildClassDefinition(cls, options);
         }
         else definition = cls;
 
@@ -133,24 +144,24 @@ export class TypeScriptWriter extends CodeWriter {
       * @param iface The interface.
       * @param contents A callback function that writes the interface contents.     
       */
-     public writeInterfaceBlock(iface: InterfaceDefinition, contents: (writer: TypeScriptWriter) => void): void 
-     /**
-      * Writes a block of code, wrapped in an interface declaration and opening and closing brackets. 
-      * This function does not write interface members.
-      * @param type A model type from which to create the interface block.
-      * @param contents A callback function that writes the interface contents.
-      * @param options An optional InterfaceOptions object.
-      */
-     public writeInterfaceBlock(iface: elements.Type, contents: (writer: TypeScriptWriter) => void, options?: opts.InterfaceOptions): void
-     public writeInterfaceBlock(iface: any, contents: (writer: TypeScriptWriter) => void, options?: opts.InterfaceOptions): void {
+    public writeInterfaceBlock(iface: InterfaceDefinition, contents: (writer: TypeScriptWriter) => void): void
+    /**
+     * Writes a block of code, wrapped in an interface declaration and opening and closing brackets. 
+     * This function does not write interface members.
+     * @param type A model type from which to create the interface block.
+     * @param contents A callback function that writes the interface contents.
+     * @param options An optional InterfaceOptions object.
+     */
+    public writeInterfaceBlock(iface: elements.Type, contents: (writer: TypeScriptWriter) => void, options?: opts.InterfaceOptions): void
+    public writeInterfaceBlock(iface: any, contents: (writer: TypeScriptWriter) => void, options?: opts.InterfaceOptions): void {
         if (!iface) return;
-        
+
         let definition: InterfaceDefinition;
         if (elements.isType(iface)) {
-            definition = TypeScriptModelBuilder.buildInterfaceDefinition(iface, options);
+            definition = this.definitionBuilder.buildInterfaceDefinition(iface, options);
         }
         else definition = iface;
-        
+
         if (definition.description) {
             this.writeJsDocLines(definition.description);
         }
@@ -161,12 +172,12 @@ export class TypeScriptWriter extends CodeWriter {
         if (definition.declare) {
             this.write('declare ');
         }
-      
+
         this.write(`interface ${definition.name}`);
         if (definition.extends) {
             this.writeExtends(definition.extends);
         }
-        
+
         // Write the contents
         this.writeEndOfLine(' {');
         this.increaseIndent();
@@ -176,86 +187,89 @@ export class TypeScriptWriter extends CodeWriter {
     }
 
     /**
+     * Writes a property from the property definition.
+     * @param property 
+     */
+    public writeProperty(property: PropertyDefinition): void
+    /**
      * Writes a class or interface property.
      * @param property The property to write.
      * @param options An optional PropertyOptions object.
      */
-    public writeProperty(property: elements.Property, options?: opts.PropertyOptions): void {
+    public writeProperty(property: elements.Property, options?: opts.PropertyOptions): void
+    public writeProperty(property: any, options?: opts.PropertyOptions): void {
         if (!property) return;
-        if (!options) options = {};
 
-        const features = (options.features === undefined) ? opts.PropertyFeatures.All : options.features;
-        const optionalityModifier = (options.optionality === undefined) ? opts.OptionalityModifier.QuestionToken : options.optionality;
-        const makeOptional = property.isOptional() ? !!(features & opts.PropertyFeatures.OptionalModifier) : false;
-        const typeName = this.getTypeName(property);    
-        const isOwnedByInterface = elements.isInterface(property.owner);
-        const defaultValueString = ((features & opts.PropertyFeatures.Initializer) && !isOwnedByInterface) ? 
-            TypeScriptModelBuilder.getDefaultValueString(property, typeName, property.defaultValue, makeOptional, optionalityModifier, options.initializePrimitiveType, options.initializeArray):
-            null;        
+        let definition: PropertyDefinition;
+        if (elements.isProperty(property)) {
+            definition = this.definitionBuilder.buildPropertyDefinition(property, options);
+        }
+        else definition = property;
 
+        const hasDefaultValue = definition.defaultValue != null; // '!= null' to allow for empty strings
 
-        if (features & opts.PropertyFeatures.JsDocDescription) {
-            this.writeJsDocDescription(property.ownedComments);
+        // Description
+        if (definition.description) {
+            this.writeJsDocLines(definition.description);
         }
         // Start a new, indented line        
         this.writeIndent();
-        // Access modifier (+ white space)
-        if ((features & opts.PropertyFeatures.AccessModifier) && !isOwnedByInterface) {
-            this.writeAccessModifier(property.visibility);
+        // Access modifier 
+        if (definition.accessModifier) {
+            this.write(`${definition.accessModifier} `);
+        }
+        // Static modifier        
+        if (definition.isStatic) {
+            this.write('static ');
         }
         // Readonly modifier
-        if ((features & opts.PropertyFeatures.ReadonlyModifier) && property.isReadOnly || property.isDerived) {
+        if (definition.isReadonly) {
             this.write('readonly ');
         }
-        // The name
+        // Name
         this.write(property.name);
-        if ((optionalityModifier & opts.OptionalityModifier.QuestionToken) && makeOptional) {
+        if (definition.isOptional && !definition.hasNullUnionType) {
             this.write('?');
         }
-        if ((features & opts.PropertyFeatures.DefiniteAssignmentAssertionModifier) && !makeOptional && !defaultValueString && !isOwnedByInterface) {
-            this.write('!'); 
+        if (!hasDefaultValue && !definition.isOptional && definition.useDefiniteAssignmentAssertionModifier) {
+            this.write('!');
         }
-
-        // The type  
-        this.write(`: ${typeName || 'any'}`);
-        if (property.isMultivalued()) {
-            this.write('[]');
-        }
-        if (makeOptional && (optionalityModifier & opts.OptionalityModifier.NullKeyword)) {
+        // Type
+        this.write(`: ${definition.typeName}`);
+        if (definition.isOptional && definition.hasNullUnionType) {
             this.write(' | null');
         }
-
-        // Initializer if not an interface and the model has a default value
-        if (defaultValueString != null) {
-            this.write(` = ${defaultValueString}`);
-        }        
+        // Initializer
+        if (hasDefaultValue) {
+            this.write(` = ${definition.defaultValue}`);
+        }
         this.writeEndOfLine(';');
     }
 
-     /**
-     * Writes a full enumeration, including members.   
-     * @param element The enumeration.          
-     */
+    /**
+    * Writes a full enumeration, including members.   
+    * @param element The enumeration.          
+    */
     public writeEnumeration(enumeration: EnumDefinition): void
-     /**
-     * Writes a full enumeration, including members.   
-     * @param element The enumeration.     
-     * @param options An optional EnumerationOptions object.
-     */
-    public writeEnumeration(enumeration: elements.Enumeration, options?: opts.EnumOptions): void 
+    /**
+    * Writes a full enumeration, including members.   
+    * @param element The enumeration.     
+    * @param options An optional EnumerationOptions object.
+    */
+    public writeEnumeration(enumeration: elements.Enumeration, options?: opts.EnumOptions): void
     public writeEnumeration(enumeration: any, options?: opts.EnumOptions): void {
-        if (!enumeration) return;        
+        if (!enumeration) return;
 
         let definition: EnumDefinition;
         if (elements.isType(enumeration)) {
-            definition = TypeScriptModelBuilder.buildEnumDefinition(enumeration, options);
+            definition = this.definitionBuilder.buildEnumDefinition(enumeration, options);
         }
         else definition = enumeration;
 
         if (definition.description) {
             this.writeJsDocLines(definition.description);
         }
-        this.writeIndent();        
+        this.writeIndent();
         if (definition.export) {
             this.write(`export `);
         }
@@ -265,7 +279,7 @@ export class TypeScriptWriter extends CodeWriter {
 
         this.write(`enum ${enumeration.name}`);
         this.writeEndOfLine();
-        this.writeCodeBlock(() => {            
+        this.writeCodeBlock(() => {
             if (!definition.members)
                 return;
 
@@ -288,7 +302,7 @@ export class TypeScriptWriter extends CodeWriter {
             }
         });
     }
-    
+
     /**
      * Writes a string literal type from a specified enumeration. Example: 'type Easing = 'ease-in' | 'ease-out' | 'ease-in-out';'     
      * @param enumeration The enumeration.     
@@ -313,51 +327,74 @@ export class TypeScriptWriter extends CodeWriter {
 
     /**
      * Writes a function declaration without a body.     
+     * @param operation The function definition.      
+     */
+    public writeFunctionDeclaration(funct: FunctionDefinition): void
+    /**
+     * Writes a function declaration without a body.     
      * @param operation The operation. 
      * @param options An optional FunctionOptions object.
      */
-    public writeFunctionDeclaration(operation: elements.Operation, options?: opts.FunctionOptions): void {
-        if (!operation) return;
-        this.writeFunctionStart(operation, options);
+    public writeFunctionDeclaration(operation: elements.Operation, options?: opts.FunctionOptions): void
+    public writeFunctionDeclaration(func: any, options?: opts.FunctionOptions): void {
+        if (!func) return;
+
+        let definition: FunctionDefinition;
+        if (elements.isOperation(func)) {
+            definition = this.definitionBuilder.buildFunctionDefinition(func, options);
+        }
+        else definition = func;
+        this.writeFunctionStart(definition);
         this.writeEndOfLine(';');
     }
 
     /**
-    * Writes a block of code, wrapped in an function declaration and opening and closing brackets.      * 
+    * Writes a block of code, wrapped in an function declaration and opening and closing brackets. 
+    * @param func The operation. 
+    * @param contents A callback that writes the operation contents.  
+    */
+    public writeFunctionBlock(func: FunctionDefinition, contents: (writer: TypeScriptWriter, op: elements.Operation) => void): void;
+    /**
+    * Writes a block of code, wrapped in an function declaration and opening and closing brackets.  
     * @param operation The operation. 
     * @param contents A callback that writes the operation contents.
     * @param options An optional FunctionOptions object.
     */
-    public writeFunctionBlock(operation: elements.Operation, contents: (writer: TypeScriptWriter, op: elements.Operation) => void, options?: opts.FunctionOptions): void {
-        if (!operation) return;
+    public writeFunctionBlock(operation: elements.Operation, contents: (writer: TypeScriptWriter, op: elements.Operation) => void, options?: opts.FunctionOptions): void;
+    public writeFunctionBlock(func: elements.Operation, contents: (writer: TypeScriptWriter, op: elements.Operation) => void, options?: opts.FunctionOptions): void {
+        if (!func) return;
 
-        this.writeFunctionStart(operation, options);
-        if (operation.isAbstract) {
+        let definition: FunctionDefinition;
+        if (elements.isOperation(func)) {
+            definition = this.definitionBuilder.buildFunctionDefinition(func, options);
+        }
+        else definition = func;
+        this.writeFunctionStart(definition);
+        if (definition.isAbstract) {
             this.writeEndOfLine(';');
             return;
         }
         this.writeEndOfLine();
-        this.writeCodeBlock((writer) => { contents(writer, operation) });
+        this.writeCodeBlock((writer) => { contents(writer, func) });
     }
 
-    
     /**
      * Gets the name of the type. This function uses the current typeNameProvider for resolving
      * the type name.
      * @param type Any element that derives from Type.
      */
     public getTypeName(type: elements.Type | null): string | null;
-     /**
-     * Gets the type name of the typed element. This function uses the current typeNameProvider for resolving
-     * the type name.
-     * @param typedElement Any element that has a type, such as a Property or Parameter.
-     */
+    /**
+    * Gets the type name of the typed element. This function uses the current typeNameProvider for resolving
+    * the type name.
+    * @param typedElement Any element that has a type, such as a Property or Parameter.
+    */
     public getTypeName(typedElement: elements.TypedElement | null): string | null;
     public getTypeName(element: any | null): string | null {
-        if (!element) 
+        if (!element)
             return null;
 
-        if (elements.isTypedElement(element)){
+        if (elements.isTypedElement(element)) {
             return this.typeNameProvider ? this.typeNameProvider.getTypeName(element) : element.getTypeName();
         }
         else if (elements.isType(element)) {
@@ -365,102 +402,81 @@ export class TypeScriptWriter extends CodeWriter {
         }
         return null;
     }
-    
-    private writeFunctionStart(operation: elements.Operation, options?: opts.FunctionOptions): void {
-        if (!operation) return;
-        if (!options) options = {};
-        const features = (options.features === undefined) ? opts.FunctionFeatures.All : options.features;
-        const paramFeatures = (options.parameterFeatures === undefined) ? opts.ParameterFeatures.All : options.parameterFeatures;
 
+    private writeFunctionStart(definition: FunctionDefinition): void {
         // jsDoc tags 
         var jsDocLines: string[] = [];
-        if (features & opts.FunctionFeatures.JsDocDescription) {
-            this.pushJsDocLinesFromComments(operation.ownedComments, jsDocLines);
+        if (definition.description) {
+            jsDocLines.push(...definition.description);
         }
-        if (paramFeatures & opts.ParameterFeatures.JsDocDescription) {
-            this.pushJsDocLinesForParameters(operation.ownedParameters, jsDocLines);
+        if (definition.parameters) {
+            this.pushJsDocLinesForParameters(definition.parameters, jsDocLines);
         }
-        this.writeJsDocLines(jsDocLines);
+        this.writeJsDocLines(jsDocLines);        
+
+        // TODO: export, declare?!
+        // if (definition.export) {
+        //     this.write(`export `);
+        // }
+        // if (definition.declare) {
+        //     this.write('declare ');
+        // }
+
         // Start a new, indented line
         this.writeIndent();
-        if (!elements.isInterface(operation.owner)) {
-            this.writeAccessModifier(operation.visibility);
+        // Access modifier 
+        if (definition.accessModifier) {
+            this.write(`${definition.accessModifier} `);
         }
-        if (operation.isStatic) {
+        // Static modifier                
+        if (definition.isStatic) {
             this.write('static ');
         }
-        else if (operation.isAbstract) {
+        else if (definition.isAbstract) {
             this.write('abstract ');
         }
-        this.write(operation.name);
-        // If needed, make the function optional using the '?'   
-        const returnParameter = operation.getReturnParameter();
-        const optionalityModifier = (options.returnOptionality === undefined) ? opts.OptionalityModifier.NullKeyword : options.returnOptionality;        
-        const makeOptional = (returnParameter && returnParameter.isOptional()) ? !!(features & opts.FunctionFeatures.OptionalModifier) : false;
-        if (makeOptional && (optionalityModifier & opts.OptionalityModifier.QuestionToken)) {
-            this.write('?');
-        }
+        this.write(definition.name);
+
+        // If needed, make the function optional using the '?'         
+        // if (definition.isOptional) {
+        //     this.write('?');
+        // }
+
         this.write('(');
-        this.writeInOutParameters(operation.ownedParameters, paramFeatures, options.parameterOptionality);
+        if (definition.parameters) {
+            this.writeInOutParameters(definition.parameters);
+        }
         this.write('): ');
 
-        // Write the return type        
-        const returnType = this.getParameterTypeName(returnParameter) || 'void';
-        this.write(returnType);
-        if (makeOptional && (optionalityModifier & opts.OptionalityModifier.NullKeyword)) {
+        // Write the return type                
+        this.write(definition.returnTypeName || 'void');
+        if (definition.returnsOptional) {
             this.write(' | null');
         }
     }
 
-    private writeInOutParameters(parameters: elements.Parameter[], features: opts.ParameterFeatures, optionalityModifier?: opts.OptionalityModifier): void {
-        if (!elements)
-            return;
-
-        if (optionalityModifier === undefined) optionalityModifier = opts.OptionalityModifier.NullKeyword;
-
+    private writeInOutParameters(parameters: ParameterDefinition[]): void {
         let i = 0;
-        parameters.forEach((p: elements.Parameter) => {
-            if (p.direction === elements.ParameterDirectionKind.return)
+        parameters.forEach((p: ParameterDefinition) => {
+            if (p.isReturn)
                 return;
-
-            const makeOptional = p.isOptional() ? !!(features & opts.ParameterFeatures.OptionalModifier) : false;
 
             if (i > 0) {
                 this.write(', ');
             }
             this.write(p.name);
-            if (makeOptional && (optionalityModifier! & opts.OptionalityModifier.QuestionToken)) {
+            if (p.isOptional && (p.useQuestionToken)) {
                 this.write('?');
             }
-            const typeName = this.getParameterTypeName(p) || 'any';
-            this.write(`: ${typeName}`);
-            if (makeOptional && (optionalityModifier! & opts.OptionalityModifier.NullKeyword)) {
+            this.write(`: ${p.typeName}`);
+            if (p.isOptional && !p.useQuestionToken) {
                 this.write(' | null');
             }
             i++;
         });
     }
-
-    private getParameterTypeName(parameter: elements.Parameter | null): string | null {
-        if (!parameter) return null;
-
-        var typeName = this.getTypeName(parameter) || 'any';
-        if (parameter.isMultivalued()) {
-            typeName = `${typeName}[]`;
-        }
-        return typeName;
-    }
-
-    private writeAccessModifier(visibilityKind: elements.VisibilityKind | null): void {
-        const visibilityString = TypeScriptWriter.getAccessModifierString(visibilityKind);
-        if (!visibilityString)
-            return;
-
-        this.write(visibilityString);
-        this.writeWhiteSpace();
-    }
-
-    private writeExtends(ext: string[]): void {       
+ 
+    private writeExtends(ext: string[]): void {
         if (ext.length === 0)
             return;
 
@@ -491,34 +507,25 @@ export class TypeScriptWriter extends CodeWriter {
             lines.push(p.body);
             i++;
         });
-
     }
 
-    private pushJsDocLinesForParameters(parameters: elements.Parameter[], lines: string[]): void {
+    private pushJsDocLinesForParameters(parameters: ParameterDefinition[], lines: string[]): void {
         if (!parameters)
             return;
 
-        parameters.forEach((p: elements.Parameter) => {
+        parameters.forEach((p: ParameterDefinition) => {
             lines.push(this.getJsDocLineForParameter(p));
         });
     }
 
-    private getJsDocLineForParameter(parameter: elements.Parameter): string {
-        const isReturn = parameter.direction === elements.ParameterDirectionKind.return;
-        const tag = isReturn ? 'returns' : 'param';
-        const commentBodies = parameter.ownedComments.map(c => c.body);
-
-        let typeName = this.getTypeName(parameter) || 'any';
-        if (parameter.isMultivalued()) {
-            typeName = `${typeName}[]`;
-        }
-
-        let line = `@${tag} {${typeName}}`;
-        if (!isReturn) {
+    private getJsDocLineForParameter(parameter: ParameterDefinition): string {
+        const tag = parameter.isReturn ? 'returns' : 'param';
+        let line = `@${tag} {${parameter.typeName}}`;
+        if (!parameter.isReturn) {
             line = `${line} ${parameter.name}`;
         }
-        if (commentBodies.length > 0) {
-            line = `${line} ${commentBodies.join(' ')}`;
+        if (parameter.description && parameter.description.length > 0) {
+            line = `${line} ${parameter.description.join(' ')}`;
         }
         return line;
     }
@@ -558,20 +565,7 @@ export class TypeScriptWriter extends CodeWriter {
             else this.writeLine(`* ${line}`);
         });
         this.writeLine('*/');
-    }
-
-    private static getAccessModifierString(visibility: elements.VisibilityKind | null): string | null {
-        switch (visibility) {
-            case elements.VisibilityKind.public:
-                return 'public';
-            case elements.VisibilityKind.private:
-                return 'private';
-            case elements.VisibilityKind.protected:
-                return 'protected';
-            default:
-                return null;
-        }
-    }
+    } 
 
     private joinWrite<TItem>(collection: TItem[], separator: string, getStringFunc: (item: TItem) => string | null) {
         let isFirst: boolean = true;

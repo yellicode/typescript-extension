@@ -1,27 +1,206 @@
+/**
+ * Enumerates the valid TypeScript access modifiers.
+ */
+export type AccessModifier = 'public' | 'private' | 'protected';
+
+/**
+ * The base interface for all TypeScript definitions. 
+ */
 export interface DefinitionBase {
+    /**
+     * Get or sets the name of the code element. This field is required.
+     */
     name: string;
+    /**
+    * Gets the description of the element. This field is optional.
+    */
     description?: string[];
 }
 
-export interface TypeDefinition extends DefinitionBase {    
+/**
+ * The base interface for class-, interface and enumeration definitions.
+ */
+export interface TypeDefinition extends DefinitionBase {
+    /**
+     * Indicates if the 'export' keyword should be written. The default value is false.
+     */
     export?: boolean;
+    /**
+     * Indicates if the 'declare' keyword should be written. The default value is false.
+     */
     declare?: boolean;
 }
 
-export interface ClassDefinition extends TypeDefinition {   
-    isAbstract?: boolean;
-    implements?: string[];
-    extends?: string[];  
+/**
+ * Represents a TypeScript property.
+ */
+export interface PropertyDefinition extends DefinitionBase {
+    /**
+    * The full type name of the property. If the type is an array,
+    * the collection must be part of the name (e.g. 'Array<string>'
+    * or 'string[]').
+    */
+    typeName: string;
+    /**
+     * Gets the property's access modifier. By default, no access modifier will be written.
+     */
+    accessModifier?: AccessModifier;
+    /**
+     * Indicates if the property is readonly. The default value is false.
+     */
+    isReadonly?: boolean;
+    /**
+     * Indicates if the property is static. The default value is false.
+     */
+    isStatic?: boolean;
+    /**
+    * Indicates if the property is optional. If true, a question mark will be appended to the name 
+    * (e.g. 'FirstName?: string'), unless hasNullUnionType is true. The default value is false.
+    */
+    isOptional?: boolean;
+    /**
+     * Indicates if the property can be null. If true, '| null' will be appended to the typeName
+     * and the question mark will be omitted (e.g. 'FirstName: string|null'). This field is ignored if 
+     * isOptional is falsy. The default value is false.
+     */
+    hasNullUnionType?: boolean;
+    /**
+     * Writes the so-called 'definite assignment assertion modifier' for the property if the property is required. 
+     * There are certain scenarios where properties can be initialized indirectly (perhaps by a helper method or dependency injection library), 
+     * in which case you can use the definite assignment assertion modifiers for your properties.
+     * The default value is false. This field is ignored if the property to write has a default value. 
+     */
+    useDefiniteAssignmentAssertionModifier?: boolean;
+    /**
+     * The default value of the property. If provided, an intitializer will be written. 
+     * If the propery is a string property, defaultValue must be quoted string. 
+     * This field is optional.
+     */
+    defaultValue?: string;
 }
 
-export interface EnumMemberDefinition extends DefinitionBase  {    
+/**
+ * Represents a TypeScript function parameter.
+ */
+export interface ParameterDefinition extends DefinitionBase {
+    /**
+     * The full type name of the parameter. If the type is a collection,
+     * the collection must be part of the name (e.g. 'string[]').
+     */
+    typeName: string;
+
+    /**
+    * Indicates if the parameter is optional. If true, the parameter will be generated
+    * as a null union type (e.g. 'myParameter: string | null'), unless useQuestionToken
+    * is true.
+    */
+    isOptional?: boolean;
+
+    /**
+     * Indicates if the parameter is a return parameter. The return parameter will 
+     * not be written as a function parameter, but is used to write a JSDoc '@returns' comment.
+     */
+    isReturn?: boolean;
+
+    /**
+     * Indicates if an optional parameter must be generated using a question token
+     * instead of using a null union type.
+     */
+    useQuestionToken?: boolean;
+}
+
+/**
+ * Represents a TypeScript function.
+ */
+export interface FunctionDefinition extends DefinitionBase {
+    /**
+    * Gets the function's access modifier. By default, no access modifier will be written.
+    */
+    accessModifier?: AccessModifier;
+
+    /**
+     * Indicates if the function should be generated as an 'abstract' function. 
+     * The default value is false.
+     */
+    isAbstract?: boolean;
+    /**
+     * Indicates if the function is static. The default value is false.
+     */
+    isStatic?: boolean;
+    /**
+     * The full type name of the function return type. If the function returns a collection,
+     * the collection must be part of the name (e.g. 'string[]'). If this value is empty, 
+     * the function will return 'void'. 
+     */
+    returnTypeName?: string;
+    /**
+    * Indicates if the return value is optional. If true, the return type will be generated
+    * as a null union type (e.g. 'string | null').
+    */
+    returnsOptional?: boolean;
+    
+    /**
+     * Gets the function's input parameters.
+     */
+    parameters?: ParameterDefinition[];
+}
+
+
+/**
+ * Represents a TypeScript class.
+ */
+export interface ClassDefinition extends TypeDefinition {
+    /**
+     * Indicates if the class should contain the 'abstract' keyword. 
+     * The default value is false.
+     */
+    isAbstract?: boolean;
+    /**
+    * Contains the names of the interfaces that the class implements. 
+    * This field is optional.
+    */
+    implements?: string[];
+    /**
+     * Contains the names of the classes that the class inherits from. 
+     * This field is optional.
+     */
+    extends?: string[];
+    /**
+     * Gets the class properties.
+     */
+    properties?: PropertyDefinition[];
+}
+
+/**
+ * Represents a TypeScript enumeration member.
+ */
+export interface EnumMemberDefinition extends DefinitionBase {
+    /**
+     * The value of the member, which can either be a number or a string.
+     * This field is optional. If this field has a value, an initializer
+     * will be written. 
+     */
     value?: string | number;
 }
 
+/**
+ * Represents a TypeScript enumeration.
+ */
 export interface EnumDefinition extends TypeDefinition {
+    /**
+     * Contains the enumeration members. This field is optional.
+     */
     members?: EnumMemberDefinition[];
 }
 
+
+/**
+ * Represents a TypeScript interface.
+ */
 export interface InterfaceDefinition extends TypeDefinition {
-    extends?: string[];  
+    /**
+    * Contains the names of the interfaces that the interface inherits from. 
+    * This field is optional.
+    */
+    extends?: string[];
 }

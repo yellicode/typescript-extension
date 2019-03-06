@@ -16,9 +16,9 @@ export class TypeUtility {
         }
     }
 
-    public static getPrimitiveTypeDefault(typeName: string | null): string | null {
+    public static getPrimitiveTypeDefault(typeName: string | null): string | undefined {
         if (!typeName)
-            return null;
+            return undefined;
 
         switch (typeName.trim()) {
             case TYPE_BOOLEAN:
@@ -27,7 +27,7 @@ export class TypeUtility {
                 return `''`; // empty string
             case TYPE_NUMBER:
                 return '0';
-            default: return null;
+            default: return undefined;
         }
     }
 }
