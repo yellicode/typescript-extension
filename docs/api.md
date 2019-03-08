@@ -7,30 +7,44 @@
 * [EnumFeatures](#enum-features) enumeration
 * [EnumMemberDefinition](#enum-member-definition) interface
 * [EnumOptions](#enum-options) interface
+* [FunctionDefinition](#function-definition) interface
 * [FunctionFeatures](#function-features) enumeration
 * [FunctionOptions](#function-options) interface
 * [InterfaceDefinition](#interface-definition) interface
 * [InterfaceFeatures](#interface-features) enumeration
 * [InterfaceOptions](#interface-options) interface
 * [OptionalityModifier](#optionality-modifier) enumeration
+* [ParameterDefinition](#parameter-definition) interface
 * [ParameterFeatures](#parameter-features) enumeration
+* [PropertyDefinition](#property-definition) interface
 * [PropertyFeatures](#property-features) enumeration
 * [PropertyOptions](#property-options) interface
 * [StringLiteralOptions](#string-literal-options) interface
 * [TypeDefinition](#type-definition) interface
-* [TypeScriptModelBuilder](#type-script-model-builder) class
 * [TypeScriptWriter](#type-script-writer) class
-* [TypeUtility](#type-utility) class
 * [WriterOptions](#writer-options) interface
 ## <a name="class-definition"></a> ClassDefinition interface
+Represents a TypeScript class.
 
 ### ClassDefinition.description: string
+Gets the description of the element. This field is optional.
 ### ClassDefinition.name: string
+Get or sets the name of the code element. This field is required.
 ### ClassDefinition.declare: boolean
+Indicates if the 'declare' keyword should be written. The default value is false.
 ### ClassDefinition.export: boolean
+Indicates if the 'export' keyword should be written. The default value is false.
 ### ClassDefinition.extends: string
+Contains the names of the classes that the class inherits from. 
+This field is optional.
 ### ClassDefinition.implements: string
+Contains the names of the interfaces that the class implements. 
+This field is optional.
 ### ClassDefinition.isAbstract: boolean
+Indicates if the class should contain the 'abstract' keyword. 
+The default value is false.
+### ClassDefinition.properties: PropertyDefinition
+Gets the class properties.
 
 ## <a name="class-features"></a> ClassFeatures enumeration
 
@@ -59,17 +73,26 @@ Indicates if the class must be exported or not (using the 'export' keyword).
 By default, the class is exported only if it has public or package visibility.    
 
 ## <a name="definition-base"></a> DefinitionBase interface
+The base interface for all TypeScript definitions. 
 
 ### DefinitionBase.description: string
+Gets the description of the element. This field is optional.
 ### DefinitionBase.name: string
+Get or sets the name of the code element. This field is required.
 
 ## <a name="enum-definition"></a> EnumDefinition interface
+Represents a TypeScript enumeration.
 
 ### EnumDefinition.description: string
+Gets the description of the element. This field is optional.
 ### EnumDefinition.name: string
+Get or sets the name of the code element. This field is required.
 ### EnumDefinition.declare: boolean
+Indicates if the 'declare' keyword should be written. The default value is false.
 ### EnumDefinition.export: boolean
+Indicates if the 'export' keyword should be written. The default value is false.
 ### EnumDefinition.members: EnumMemberDefinition
+Contains the enumeration members. This field is optional.
 
 ## <a name="enum-features"></a> EnumFeatures enumeration
 
@@ -79,10 +102,16 @@ By default, the class is exported only if it has public or package visibility.
 * All
 
 ## <a name="enum-member-definition"></a> EnumMemberDefinition interface
+Represents a TypeScript enumeration member.
 
 ### EnumMemberDefinition.description: string
+Gets the description of the element. This field is optional.
 ### EnumMemberDefinition.name: string
+Get or sets the name of the code element. This field is required.
 ### EnumMemberDefinition.value: any
+The value of the member, which can either be a number or a string.
+This field is optional. If this field has a value, an initializer
+will be written. 
 
 ## <a name="enum-options"></a> EnumOptions interface
 
@@ -96,6 +125,30 @@ By default, the class is exported only if it has public or package visibility.
 Any string to prefix the enum keyword with, such as "export".
 Indicates if the class must be exported or not (using the 'export' keyword).
 By default, the class is exported only if it has public or package visibility.    
+
+## <a name="function-definition"></a> FunctionDefinition interface
+Represents a TypeScript function.
+
+### FunctionDefinition.description: string
+Gets the description of the element. This field is optional.
+### FunctionDefinition.name: string
+Get or sets the name of the code element. This field is required.
+### FunctionDefinition.accessModifier: any
+Gets the function's access modifier. By default, no access modifier will be written.
+### FunctionDefinition.isAbstract: boolean
+Indicates if the function should be generated as an 'abstract' function. 
+The default value is false.
+### FunctionDefinition.isStatic: boolean
+Indicates if the function is static. The default value is false.
+### FunctionDefinition.parameters: ParameterDefinition
+Gets the function's input parameters.
+### FunctionDefinition.returnsOptional: boolean
+Indicates if the return value is optional. If true, the return type will be generated
+as a null union type (e.g. 'string | null').
+### FunctionDefinition.returnTypeName: string
+The full type name of the function return type. If the function returns a collection,
+the collection must be part of the name (e.g. 'string[]'). If this value is empty, 
+the function will return 'void'. 
 
 ## <a name="function-features"></a> FunctionFeatures enumeration
 
@@ -115,12 +168,19 @@ Indicates what to write when an input parameters has a lower bound of 0. The def
 Indicates what to write when the return parameter has a lower bound of 0. The default is OptionalityModifier.NullKeyword.
 
 ## <a name="interface-definition"></a> InterfaceDefinition interface
+Represents a TypeScript interface.
 
 ### InterfaceDefinition.description: string
+Gets the description of the element. This field is optional.
 ### InterfaceDefinition.name: string
+Get or sets the name of the code element. This field is required.
 ### InterfaceDefinition.declare: boolean
+Indicates if the 'declare' keyword should be written. The default value is false.
 ### InterfaceDefinition.export: boolean
+Indicates if the 'export' keyword should be written. The default value is false.
 ### InterfaceDefinition.extends: string
+Contains the names of the interfaces that the interface inherits from. 
+This field is optional.
 
 ## <a name="interface-features"></a> InterfaceFeatures enumeration
 
@@ -158,12 +218,67 @@ Defines options for dealing with elements that are 'optional', meaning that they
 
    Write a question token, for example 'myProperty?: string;';
 
+## <a name="parameter-definition"></a> ParameterDefinition interface
+Represents a TypeScript function parameter.
+
+### ParameterDefinition.description: string
+Gets the description of the element. This field is optional.
+### ParameterDefinition.name: string
+Get or sets the name of the code element. This field is required.
+### ParameterDefinition.isOptional: boolean
+Indicates if the parameter is optional. If true, the parameter will be generated
+as a null union type (e.g. 'myParameter: string | null'), unless useQuestionToken
+is true.
+### ParameterDefinition.isReturn: boolean
+Indicates if the parameter is a return parameter. The return parameter will 
+not be written as a function parameter, but is used to write a JSDoc '@returns' comment.
+### ParameterDefinition.typeName: string
+The full type name of the parameter. If the type is a collection,
+the collection must be part of the name (e.g. 'string[]').
+### ParameterDefinition.useQuestionToken: boolean
+Indicates if an optional parameter must be generated using a question token
+instead of using a null union type.
+
 ## <a name="parameter-features"></a> ParameterFeatures enumeration
 
 * None
 * JsDocDescription
 * OptionalModifier
 * All
+
+## <a name="property-definition"></a> PropertyDefinition interface
+Represents a TypeScript property.
+
+### PropertyDefinition.description: string
+Gets the description of the element. This field is optional.
+### PropertyDefinition.name: string
+Get or sets the name of the code element. This field is required.
+### PropertyDefinition.accessModifier: any
+Gets the property's access modifier. By default, no access modifier will be written.
+### PropertyDefinition.defaultValue: string
+The default value of the property. If provided, an intitializer will be written. 
+If the propery is a string property, defaultValue must be quoted string. 
+This field is optional.
+### PropertyDefinition.hasNullUnionType: boolean
+Indicates if the property can be null. If true, '| null' will be appended to the typeName
+and the question mark will be omitted (e.g. 'FirstName: string|null'). This field is ignored if 
+isOptional is falsy. The default value is false.
+### PropertyDefinition.isOptional: boolean
+Indicates if the property is optional. If true, a question mark will be appended to the name 
+(e.g. 'FirstName?: string'), unless hasNullUnionType is true. The default value is false.
+### PropertyDefinition.isReadonly: boolean
+Indicates if the property is readonly. The default value is false.
+### PropertyDefinition.isStatic: boolean
+Indicates if the property is static. The default value is false.
+### PropertyDefinition.typeName: string
+The full type name of the property. If the type is an array,
+the collection must be part of the name (e.g. 'Array<string>'
+or 'string[]').
+### PropertyDefinition.useDefiniteAssignmentAssertionModifier: boolean
+Writes the so-called 'definite assignment assertion modifier' for the property if the property is required. 
+There are certain scenarios where properties can be initialized indirectly (perhaps by a helper method or dependency injection library), 
+in which case you can use the definite assignment assertion modifiers for your properties.
+The default value is false. This field is ignored if the property to write has a default value. 
 
 ## <a name="property-features"></a> PropertyFeatures enumeration
 
@@ -206,44 +321,21 @@ Indicates if the literal must be exported or not (using the 'export' keyword).
 By default, the literal is exported only if the enum has public or package visibility.
 
 ## <a name="type-definition"></a> TypeDefinition interface
+The base interface for class-, interface and enumeration definitions.
 
 ### TypeDefinition.description: string
+Gets the description of the element. This field is optional.
 ### TypeDefinition.name: string
+Get or sets the name of the code element. This field is required.
 ### TypeDefinition.declare: boolean
+Indicates if the 'declare' keyword should be written. The default value is false.
 ### TypeDefinition.export: boolean
-
-## <a name="type-script-model-builder"></a> TypeScriptModelBuilder class
-
-### TypeScriptModelBuilder.buildClassDefinition(type, options) : ClassDefinition
-* type: Type
-* options: [ClassOptions](#class-options)
-### TypeScriptModelBuilder.buildEnumDefinition(type, options) : EnumDefinition
-* type: Type
-* options: [EnumOptions](#enum-options)
-### TypeScriptModelBuilder.buildInterfaceDefinition(type, options) : InterfaceDefinition
-* type: Type
-* options: [InterfaceOptions](#interface-options)
-### TypeScriptModelBuilder.getDefaultValueString(element, typeName, defaultValue, isOptional, optionalityModifier, initializePrimitiveType, initializeArray) : string
-* element: MultiplicityElement
-* typeName: string
-* defaultValue: ValueSpecification
-* isOptional: boolean
-* optionalityModifier: [OptionalityModifier](#optionality-modifier)
-* initializePrimitiveType: boolean
-* initializeArray: boolean
+Indicates if the 'export' keyword should be written. The default value is false.
 
 ## <a name="type-script-writer"></a> TypeScriptWriter class
 Provides code writing functionality specific for TypeScript. 
 
 ### TypeScriptWriter.maxCommentWidth: any
-### TypeScriptWriter.getTypeName(typedElement) : string
-Gets the name of the type. This function uses the current typeNameProvider for resolving
-the type name.
-Gets the type name of the typed element. This function uses the current typeNameProvider for resolving
-the type name.
-* typedElement: TypedElement
-
-   Any element that has a type, such as a Property or Parameter.
 ### TypeScriptWriter.getTypeName(type) : string
 Gets the name of the type. This function uses the current typeNameProvider for resolving
 the type name.
@@ -252,6 +344,14 @@ the type name.
 * type: Type
 
    Any element that derives from Type.
+### TypeScriptWriter.getTypeName(typedElement) : string
+Gets the name of the type. This function uses the current typeNameProvider for resolving
+the type name.
+Gets the type name of the typed element. This function uses the current typeNameProvider for resolving
+the type name.
+* typedElement: TypedElement
+
+   Any element that has a type, such as a Property or Parameter.
 ### TypeScriptWriter.writeClassBlock(cls, contents) : void
 Writes a block of code, wrapped in a class declaration and opening and closing brackets. 
 This function does not write class members.
@@ -295,8 +395,18 @@ Writes a full enumeration, including members.
 Writes a full enumeration, including members.   
 Writes a full enumeration, including members.   
 * enumeration: [EnumDefinition](#enum-definition)
+### TypeScriptWriter.writeFunctionBlock(func, contents) : void
+Writes a block of code, wrapped in an function declaration and opening and closing brackets. 
+Writes a block of code, wrapped in an function declaration and opening and closing brackets.  
+* func: [FunctionDefinition](#function-definition)
+
+   The operation. 
+* contents: (writer: TypeScriptWriter, op: Operation) => void
+
+   A callback that writes the operation contents.  
 ### TypeScriptWriter.writeFunctionBlock(operation, contents, options) : void
-Writes a block of code, wrapped in an function declaration and opening and closing brackets.      * 
+Writes a block of code, wrapped in an function declaration and opening and closing brackets. 
+Writes a block of code, wrapped in an function declaration and opening and closing brackets.  
 * operation: Operation
 
    The operation. 
@@ -306,7 +416,12 @@ Writes a block of code, wrapped in an function declaration and opening and closi
 * options: [FunctionOptions](#function-options)
 
    An optional FunctionOptions object.
+### TypeScriptWriter.writeFunctionDeclaration(funct) : void
+Writes a function declaration without a body.     
+Writes a function declaration without a body.     
+* funct: [FunctionDefinition](#function-definition)
 ### TypeScriptWriter.writeFunctionDeclaration(operation, options) : void
+Writes a function declaration without a body.     
 Writes a function declaration without a body.     
 * operation: Operation
 
@@ -351,15 +466,16 @@ This function does not write interface members.
 * contents: (writer: TypeScriptWriter) => void
 
    A callback function that writes the interface contents.     
-### TypeScriptWriter.writeJsDocDescription(comments) : void
-* comments: Comment
 ### TypeScriptWriter.writeJsDocDescription(text) : void
 * text: string
+### TypeScriptWriter.writeJsDocDescription(comments) : void
+* comments: Comment
 ### TypeScriptWriter.writeJsDocLines(lines) : void
 * lines: string
 ### TypeScriptWriter.writeJsDocParagraph(text) : void
 * text: string
 ### TypeScriptWriter.writeProperty(property, options) : void
+Writes a property from the property definition.
 Writes a class or interface property.
 * property: Property
 
@@ -367,19 +483,20 @@ Writes a class or interface property.
 * options: [PropertyOptions](#property-options)
 
    An optional PropertyOptions object.
+### TypeScriptWriter.writeProperty(property) : void
+Writes a property from the property definition.
+Writes a class or interface property.
+* property: [PropertyDefinition](#property-definition)
+### TypeScriptWriter.writeRegionBlock(name, contents) : this
+Writes a block of code wrapped in a #region block.      
+* name: string
+* contents: (writer: TypeScriptWriter) => void
 ### TypeScriptWriter.writeStringLiteralType(enumeration, options) : void
 Writes a string literal type from a specified enumeration. Example: 'type Easing = 'ease-in' | 'ease-out' | 'ease-in-out';'     
 * enumeration: Enumeration
 
    The enumeration.     
 * options: [StringLiteralOptions](#string-literal-options)
-
-## <a name="type-utility"></a> TypeUtility class
-
-### TypeUtility.getPrimitiveTypeDefault(typeName) : string
-* typeName: string
-### TypeUtility.isPrimitiveType(typeName) : boolean
-* typeName: string
 
 ## <a name="writer-options"></a> WriterOptions interface
 
