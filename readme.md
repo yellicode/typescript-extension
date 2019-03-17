@@ -112,7 +112,7 @@ Generator.generateFromModel({ outputFile: './model-based-sample.ts' }, (output: 
     model.getAllClasses().forEach(cls => {
         ts.writeClassBlock(cls, () => {
             cls.ownedAttributes.forEach(att => {
-                ts.writeProperty(att, { initializePrimitiveType: true, initializeArray: true, optionality: OptionalityModifier.NullKeyword });
+                ts.writeProperty(att);
                 ts.writeLine();
             });
         }, { export: true });
