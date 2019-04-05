@@ -278,29 +278,31 @@ export class TypeScriptWriter extends CodeWriter {
         }
 
         this.write(`enum ${enumeration.name}`);
-        this.writeEndOfLine();
-        this.writeCodeBlock(() => {
-            if (!definition.members)
-                return;
+        this.writeEndOfLine(' {');
+        this.increaseIndent();
 
-            for (let i = 0, len = definition.members.length; i < len; i++) {
-                const member = definition.members[i];
-                if (member.description) {
-                    this.writeJsDocLines(member.description);
-                }
-                this.writeIndent();
-                this.write(member.name);
-                if (member.value || member.value === 0) {
-                    const initialValue = (typeof member.value === "number") ?
-                        member.value.toString() : `'${member.value}'`; // a string enum: wrap in quotes
-                    this.write(` = ${initialValue}`);
-                }
-                if (i < len - 1) {
-                    this.write(',');
-                }
-                this.writeEndOfLine();
+        if (!definition.members)
+            return;
+
+        for (let i = 0, len = definition.members.length; i < len; i++) {
+            const member = definition.members[i];
+            if (member.description) {
+                this.writeJsDocLines(member.description);
             }
-        });
+            this.writeIndent();
+            this.write(member.name);
+            if (member.value || member.value === 0) {
+                const initialValue = (typeof member.value === "number") ?
+                    member.value.toString() : `'${member.value}'`; // a string enum: wrap in quotes
+                this.write(` = ${initialValue}`);
+            }
+            if (i < len - 1) {
+                this.write(',');
+            }
+            this.writeEndOfLine();
+        }
+        this.decreaseIndent();
+        this.writeLine('}');
     }
 
     /**
@@ -412,7 +414,7 @@ export class TypeScriptWriter extends CodeWriter {
         if (definition.parameters) {
             this.pushJsDocLinesForParameters(definition.parameters, jsDocLines);
         }
-        this.writeJsDocLines(jsDocLines);        
+        this.writeJsDocLines(jsDocLines);
 
         // TODO: export, declare?!
         // if (definition.export) {
@@ -475,7 +477,7 @@ export class TypeScriptWriter extends CodeWriter {
             i++;
         });
     }
- 
+
     private writeExtends(ext: string[]): void {
         if (ext.length === 0)
             return;
@@ -565,7 +567,7 @@ export class TypeScriptWriter extends CodeWriter {
             else this.writeLine(`* ${line}`);
         });
         this.writeLine('*/');
-    } 
+    }
 
     private joinWrite<TItem>(collection: TItem[], separator: string, getStringFunc: (item: TItem) => string | null) {
         let isFirst: boolean = true;
