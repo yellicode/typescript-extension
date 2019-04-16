@@ -41,49 +41,52 @@ export class TypeScriptWriter extends CodeWriter {
      * @param exports The name(s) of the export(s) to be imported.
      * @param alias The alias under which the module should be imported.
      */
-    public writeImports(moduleName: string, alias: string): void
-    public writeImports(moduleName: string, ...exports: any[]): void
-    public writeImports(moduleName: string, x: any): void {
+    public writeImports(moduleName: string, alias: string): this
+    public writeImports(moduleName: string, ...exports: any[]): this
+    public writeImports(moduleName: string, x: any): this {
         if (!moduleName)
-            return;
+            return this;
 
         // Ensure forward slashes in the module name
         moduleName = moduleName.replace(/\\/g, "/");
 
         if (x instanceof Array) {
-            if (x.length === 0) return;
+            if (x.length === 0) return this;
             this.writeLine(`import { ${x.join(', ')} } from '${moduleName}';`);
-            return;
+            return this;
         }
         // x is the alias
         if (!x) {
             x = TypeScriptWriter.makeSafeModuleName(moduleName);
         }
         this.writeLine(`import * as ${x} from '${moduleName}';`);
+        return this;
     }
 
     /**
     * Writes an indented block of decorator code, wrapped in opening and closing brackets. 
     * @param contents A callback function that writes the contents.
     */
-    public writeDecoratorCodeBlock(decoratorName: string, contents: (writer: TypeScriptWriter) => void): void {
+    public writeDecoratorCodeBlock(decoratorName: string, contents: (writer: TypeScriptWriter) => void): this {
         this.writeLine(`@${decoratorName}({`);
         this.increaseIndent();
         if (contents) contents(this);
         this.decreaseIndent();
         this.writeLine('})');
+        return this;
     }
 
     /**
     * Writes an indented block of code, wrapped in opening and closing brackets. 
     * @param contents A callback function that writes the contents.
     */
-    public writeCodeBlock(contents: (writer: TypeScriptWriter) => void): void {
+    public writeCodeBlock(contents: (writer: TypeScriptWriter) => void): this {
         this.writeLine('{');
         this.increaseIndent();
         if (contents) contents(this);
         this.decreaseIndent();
         this.writeLine('}');
+        return this;
     };
 
     /**
@@ -92,7 +95,7 @@ export class TypeScriptWriter extends CodeWriter {
     * @param definition The class definition.   
     * @param contents A callback function that writes the class contents.   
     */
-    public writeClassBlock(cls: ClassDefinition, contents: (writer: TypeScriptWriter) => void): void
+    public writeClassBlock(cls: ClassDefinition, contents: (writer: TypeScriptWriter) => void): this
     /**
      * Writes a block of code, wrapped in a class declaration and opening and closing brackets. 
     * This function does not write class members.   
@@ -100,9 +103,9 @@ export class TypeScriptWriter extends CodeWriter {
     * @param contents A callback function that writes the class contents.
     * @param options An optional ClassOptions object.
     */
-    public writeClassBlock(cls: elements.Type, contents: (writer: TypeScriptWriter) => void, options?: opts.ClassOptions): void
-    public writeClassBlock(cls: any, contents: (writer: TypeScriptWriter) => void, options?: opts.ClassOptions): void {
-        if (!cls) return;
+    public writeClassBlock(cls: elements.Type, contents: (writer: TypeScriptWriter) => void, options?: opts.ClassOptions): this
+    public writeClassBlock(cls: any, contents: (writer: TypeScriptWriter) => void, options?: opts.ClassOptions): this {
+        if (!cls) return this;
 
         let definition: ClassDefinition;
         if (elements.isType(cls)) {
@@ -136,6 +139,7 @@ export class TypeScriptWriter extends CodeWriter {
         if (contents) contents(this);
         this.decreaseIndent();
         this.writeLine('}');
+        return this;
     }
 
     /**
@@ -144,7 +148,7 @@ export class TypeScriptWriter extends CodeWriter {
       * @param iface The interface.
       * @param contents A callback function that writes the interface contents.     
       */
-    public writeInterfaceBlock(iface: InterfaceDefinition, contents: (writer: TypeScriptWriter) => void): void
+    public writeInterfaceBlock(iface: InterfaceDefinition, contents: (writer: TypeScriptWriter) => void): this
     /**
      * Writes a block of code, wrapped in an interface declaration and opening and closing brackets. 
      * This function does not write interface members.
@@ -152,9 +156,9 @@ export class TypeScriptWriter extends CodeWriter {
      * @param contents A callback function that writes the interface contents.
      * @param options An optional InterfaceOptions object.
      */
-    public writeInterfaceBlock(iface: elements.Type, contents: (writer: TypeScriptWriter) => void, options?: opts.InterfaceOptions): void
-    public writeInterfaceBlock(iface: any, contents: (writer: TypeScriptWriter) => void, options?: opts.InterfaceOptions): void {
-        if (!iface) return;
+    public writeInterfaceBlock(iface: elements.Type, contents: (writer: TypeScriptWriter) => void, options?: opts.InterfaceOptions): this
+    public writeInterfaceBlock(iface: any, contents: (writer: TypeScriptWriter) => void, options?: opts.InterfaceOptions): this {
+        if (!iface) return this;
 
         let definition: InterfaceDefinition;
         if (elements.isType(iface)) {
@@ -184,21 +188,22 @@ export class TypeScriptWriter extends CodeWriter {
         if (contents) contents(this);
         this.decreaseIndent();
         this.writeLine('}');
+        return this;
     }
 
     /**
      * Writes a property from the property definition.
      * @param property 
      */
-    public writeProperty(property: PropertyDefinition): void
+    public writeProperty(property: PropertyDefinition): this
     /**
      * Writes a class or interface property.
      * @param property The property to write.
      * @param options An optional PropertyOptions object.
      */
-    public writeProperty(property: elements.Property, options?: opts.PropertyOptions): void
-    public writeProperty(property: any, options?: opts.PropertyOptions): void {
-        if (!property) return;
+    public writeProperty(property: elements.Property, options?: opts.PropertyOptions): this
+    public writeProperty(property: any, options?: opts.PropertyOptions): this {
+        if (!property) return this;
 
         let definition: PropertyDefinition;
         if (elements.isProperty(property)) {
@@ -244,21 +249,22 @@ export class TypeScriptWriter extends CodeWriter {
             this.write(` = ${definition.defaultValue}`);
         }
         this.writeEndOfLine(';');
+        return this;
     }
 
     /**
     * Writes a full enumeration, including members.   
     * @param element The enumeration.          
     */
-    public writeEnumeration(enumeration: EnumDefinition): void
+    public writeEnumeration(enumeration: EnumDefinition): this
     /**
     * Writes a full enumeration, including members.   
     * @param element The enumeration.     
     * @param options An optional EnumerationOptions object.
     */
-    public writeEnumeration(enumeration: elements.Enumeration, options?: opts.EnumOptions): void
-    public writeEnumeration(enumeration: any, options?: opts.EnumOptions): void {
-        if (!enumeration) return;
+    public writeEnumeration(enumeration: elements.Enumeration, options?: opts.EnumOptions): this
+    public writeEnumeration(enumeration: any, options?: opts.EnumOptions): this {
+        if (!enumeration) return this;
 
         let definition: EnumDefinition;
         if (elements.isType(enumeration)) {
@@ -282,7 +288,7 @@ export class TypeScriptWriter extends CodeWriter {
         this.increaseIndent();
 
         if (!definition.members)
-            return;
+            return this;
 
         for (let i = 0, len = definition.members.length; i < len; i++) {
             const member = definition.members[i];
@@ -303,6 +309,7 @@ export class TypeScriptWriter extends CodeWriter {
         }
         this.decreaseIndent();
         this.writeLine('}');
+        return this;
     }
 
     /**
@@ -310,8 +317,8 @@ export class TypeScriptWriter extends CodeWriter {
      * @param enumeration The enumeration.     
      * @param prefix An optional prefix, such as 'export'.
      */
-    public writeStringLiteralType(enumeration: elements.Enumeration, options?: opts.StringLiteralOptions): void {
-        if (!enumeration) return;
+    public writeStringLiteralType(enumeration: elements.Enumeration, options?: opts.StringLiteralOptions): this {
+        if (!enumeration) return this;
         if (!options) options = {};
 
         this.writeJsDocDescription(enumeration.ownedComments);
@@ -325,21 +332,22 @@ export class TypeScriptWriter extends CodeWriter {
         this.write(`type ${enumeration.name} = `);
         this.joinWrite(enumeration.ownedLiterals, ' | ', lit => `'${lit.name}'`);
         this.writeEndOfLine(';');
+        return this;
     }
 
     /**
      * Writes a function declaration without a body.     
      * @param operation The function definition.      
      */
-    public writeFunctionDeclaration(funct: FunctionDefinition): void
+    public writeFunctionDeclaration(funct: FunctionDefinition): this
     /**
      * Writes a function declaration without a body.     
      * @param operation The operation. 
      * @param options An optional FunctionOptions object.
      */
-    public writeFunctionDeclaration(operation: elements.Operation, options?: opts.FunctionOptions): void
-    public writeFunctionDeclaration(func: any, options?: opts.FunctionOptions): void {
-        if (!func) return;
+    public writeFunctionDeclaration(operation: elements.Operation, options?: opts.FunctionOptions): this
+    public writeFunctionDeclaration(func: any, options?: opts.FunctionOptions): this {
+        if (!func) return this;
 
         let definition: FunctionDefinition;
         if (elements.isOperation(func)) {
@@ -348,6 +356,7 @@ export class TypeScriptWriter extends CodeWriter {
         else definition = func;
         this.writeFunctionStart(definition);
         this.writeEndOfLine(';');
+        return this;
     }
 
     /**
@@ -355,16 +364,16 @@ export class TypeScriptWriter extends CodeWriter {
     * @param func The operation. 
     * @param contents A callback that writes the operation contents.  
     */
-    public writeFunctionBlock(func: FunctionDefinition, contents: (writer: TypeScriptWriter, op: elements.Operation) => void): void;
+    public writeFunctionBlock(func: FunctionDefinition, contents: (writer: TypeScriptWriter, op: elements.Operation) => void): this;
     /**
     * Writes a block of code, wrapped in an function declaration and opening and closing brackets.  
     * @param operation The operation. 
     * @param contents A callback that writes the operation contents.
     * @param options An optional FunctionOptions object.
     */
-    public writeFunctionBlock(operation: elements.Operation, contents: (writer: TypeScriptWriter, op: elements.Operation) => void, options?: opts.FunctionOptions): void;
-    public writeFunctionBlock(func: elements.Operation, contents: (writer: TypeScriptWriter, op: elements.Operation) => void, options?: opts.FunctionOptions): void {
-        if (!func) return;
+    public writeFunctionBlock(operation: elements.Operation, contents: (writer: TypeScriptWriter, op: elements.Operation) => void, options?: opts.FunctionOptions): this;
+    public writeFunctionBlock(func: elements.Operation, contents: (writer: TypeScriptWriter, op: elements.Operation) => void, options?: opts.FunctionOptions): this {
+        if (!func) return this;
 
         let definition: FunctionDefinition;
         if (elements.isOperation(func)) {
@@ -374,10 +383,11 @@ export class TypeScriptWriter extends CodeWriter {
         this.writeFunctionStart(definition);
         if (definition.isAbstract) {
             this.writeEndOfLine(';');
-            return;
+            return this;
         }
         this.writeEndOfLine();
         this.writeCodeBlock((writer) => { contents(writer, func) });
+        return this;
     }
 
     /**
@@ -532,9 +542,9 @@ export class TypeScriptWriter extends CodeWriter {
         return line;
     }
 
-    public writeJsDocDescription(comments: elements.Comment[]): void
-    public writeJsDocDescription(text: string): void
-    public writeJsDocDescription(data: any): void {
+    public writeJsDocDescription(comments: elements.Comment[]): this
+    public writeJsDocDescription(text: string): this
+    public writeJsDocDescription(data: any): this {
         const lines: string[] = [];
         if (typeof data == 'string') {
             lines.push(data);
@@ -542,15 +552,17 @@ export class TypeScriptWriter extends CodeWriter {
             this.pushJsDocLinesFromComments(data, lines);
         }
         this.writeJsDocLines(lines);
+        return this;
     }
 
-    public writeJsDocParagraph(text: string) {
+    public writeJsDocParagraph(text: string): this {
         this.writeJsDocLines([text]);
+        return this;
     }
 
-    public writeJsDocLines(lines: string[]) {
+    public writeJsDocLines(lines: string[]): this {
         if (lines.length === 0)
-            return;
+            return this;
 
         this.writeLine('/**');
 
@@ -567,6 +579,7 @@ export class TypeScriptWriter extends CodeWriter {
             else this.writeLine(`* ${line}`);
         });
         this.writeLine('*/');
+        return this;
     }
 
     private joinWrite<TItem>(collection: TItem[], separator: string, getStringFunc: (item: TItem) => string | null) {
