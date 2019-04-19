@@ -103,7 +103,7 @@ This template generates a TypeScript code file with all classes in the model and
 
 ```ts
 import { Generator, TextWriter } from '@yellicode/templating';
-import { TypeScriptWriter, OptionalityModifier } from '@yellicode/typescript';
+import { TypeScriptWriter } from '@yellicode/typescript';
 import * as elements from '@yellicode/elements';
 
 Generator.generateFromModel({ outputFile: './model-based-sample.ts' }, (output: TextWriter, model: elements.Model) => {
