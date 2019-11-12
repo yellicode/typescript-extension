@@ -1,7 +1,6 @@
 ﻿import * as elements from '@yellicode/elements';
-import { DefaultTypeNameProvider } from '@yellicode/templating';
 
-export class TypeScriptTypeNameProvider extends DefaultTypeNameProvider {
+export class TypeScriptTypeNameProvider extends elements.DefaultTypeNameProvider {
 
     protected /*override*/ getTypeNameForType(type: elements.Type | null, isDataType: boolean): string | null {
         if (!type)

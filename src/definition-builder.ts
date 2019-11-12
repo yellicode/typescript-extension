@@ -2,10 +2,9 @@ import * as elements from '@yellicode/elements';
 import { ClassDefinition, InterfaceDefinition, EnumDefinition, EnumMemberDefinition, PropertyDefinition, AccessModifier, ParameterDefinition, FunctionDefinition } from './model';
 import * as opts from './options';
 import { TypeUtility } from './type-utility';
-import { TypeNameProvider } from '@yellicode/templating';
 
 export class DefinitionBuilder {
-    constructor(private typeNameProvider: TypeNameProvider) {}
+    constructor(private typeNameProvider: elements.TypeNameProvider) {}
 
     public buildClassDefinition(type: elements.Type, options?: opts.ClassOptions): ClassDefinition {
         if (!options) options = {};

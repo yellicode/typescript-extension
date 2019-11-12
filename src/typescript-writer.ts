@@ -1,7 +1,8 @@
 ﻿import * as elements from '@yellicode/elements';
 import * as opts from './options';
 
-import { CodeWriter, TextWriter, CodeWriterUtility, TypeNameProvider, NameUtility } from '@yellicode/templating';
+import { CodeWriter, TextWriter, NameUtility, CodeWriterUtility } from '@yellicode/core';
+import { TypeNameProvider } from '@yellicode/elements';
 import { TypeScriptTypeNameProvider } from './typescript-type-name-provider';
 import { ClassDefinition, InterfaceDefinition, EnumDefinition, PropertyDefinition, FunctionDefinition, ParameterDefinition } from './model';
 import { DefinitionBuilder } from './definition-builder';

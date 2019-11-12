@@ -1,4 +1,4 @@
-﻿import { TypeNameProvider } from '@yellicode/templating';
+﻿import { TypeNameProvider } from '@yellicode/elements';
 
 /**
  * Defines options for dealing with elements that are 'optional', meaning that they have a lower bound of 0.
