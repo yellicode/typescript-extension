@@ -352,7 +352,7 @@ the type name.
 * typedElement: TypedElement
 
    Any element that has a type, such as a Property or Parameter.
-### TypeScriptWriter.writeClassBlock(cls, contents) : void
+### TypeScriptWriter.writeClassBlock(cls, contents) : this
 Writes a block of code, wrapped in a class declaration and opening and closing brackets. 
 This function does not write class members.
 Writes a block of code, wrapped in a class declaration and opening and closing brackets. 
@@ -361,7 +361,7 @@ This function does not write class members.
 * contents: (writer: TypeScriptWriter) => void
 
    A callback function that writes the class contents.   
-### TypeScriptWriter.writeClassBlock(cls, contents, options) : void
+### TypeScriptWriter.writeClassBlock(cls, contents, options) : this
 Writes a block of code, wrapped in a class declaration and opening and closing brackets. 
 This function does not write class members.
 Writes a block of code, wrapped in a class declaration and opening and closing brackets. 
@@ -373,29 +373,29 @@ This function does not write class members.
 * options: [ClassOptions](#class-options)
 
    An optional ClassOptions object.
-### TypeScriptWriter.writeCodeBlock(contents) : void
+### TypeScriptWriter.writeCodeBlock(contents) : this
 Writes an indented block of code, wrapped in opening and closing brackets. 
 * contents: (writer: TypeScriptWriter) => void
 
    A callback function that writes the contents.
-### TypeScriptWriter.writeDecoratorCodeBlock(decoratorName, contents) : void
+### TypeScriptWriter.writeDecoratorCodeBlock(decoratorName, contents) : this
 Writes an indented block of decorator code, wrapped in opening and closing brackets. 
 * decoratorName: string
 * contents: (writer: TypeScriptWriter) => void
 
    A callback function that writes the contents.
-### TypeScriptWriter.writeEnumeration(enumeration, options) : void
+### TypeScriptWriter.writeEnumeration(enumeration, options) : this
 Writes a full enumeration, including members.   
 Writes a full enumeration, including members.   
 * enumeration: Enumeration
 * options: [EnumOptions](#enum-options)
 
    An optional EnumerationOptions object.
-### TypeScriptWriter.writeEnumeration(enumeration) : void
+### TypeScriptWriter.writeEnumeration(enumeration) : this
 Writes a full enumeration, including members.   
 Writes a full enumeration, including members.   
 * enumeration: [EnumDefinition](#enum-definition)
-### TypeScriptWriter.writeFunctionBlock(func, contents) : void
+### TypeScriptWriter.writeFunctionBlock(func, contents) : this
 Writes a block of code, wrapped in an function declaration and opening and closing brackets. 
 Writes a block of code, wrapped in an function declaration and opening and closing brackets.  
 * func: [FunctionDefinition](#function-definition)
@@ -404,7 +404,7 @@ Writes a block of code, wrapped in an function declaration and opening and closi
 * contents: (writer: TypeScriptWriter, op: Operation) => void
 
    A callback that writes the operation contents.  
-### TypeScriptWriter.writeFunctionBlock(operation, contents, options) : void
+### TypeScriptWriter.writeFunctionBlock(operation, contents, options) : this
 Writes a block of code, wrapped in an function declaration and opening and closing brackets. 
 Writes a block of code, wrapped in an function declaration and opening and closing brackets.  
 * operation: Operation
@@ -416,11 +416,11 @@ Writes a block of code, wrapped in an function declaration and opening and closi
 * options: [FunctionOptions](#function-options)
 
    An optional FunctionOptions object.
-### TypeScriptWriter.writeFunctionDeclaration(funct) : void
+### TypeScriptWriter.writeFunctionDeclaration(funct) : this
 Writes a function declaration without a body.     
 Writes a function declaration without a body.     
 * funct: [FunctionDefinition](#function-definition)
-### TypeScriptWriter.writeFunctionDeclaration(operation, options) : void
+### TypeScriptWriter.writeFunctionDeclaration(operation, options) : this
 Writes a function declaration without a body.     
 Writes a function declaration without a body.     
 * operation: Operation
@@ -429,12 +429,12 @@ Writes a function declaration without a body.
 * options: [FunctionOptions](#function-options)
 
    An optional FunctionOptions object.
-### TypeScriptWriter.writeImports(moduleName, exports) : void
+### TypeScriptWriter.writeImports(moduleName, exports) : this
 Writes an import statement that imports the specified exports from the
 specified module. 
 * moduleName: string
 * exports: any
-### TypeScriptWriter.writeImports(moduleName, alias) : void
+### TypeScriptWriter.writeImports(moduleName, alias) : this
 Writes an import statement that imports the specified exports from the
 specified module. 
 * moduleName: string
@@ -443,7 +443,7 @@ specified module.
 * alias: string
 
    The alias under which the module should be imported.
-### TypeScriptWriter.writeInterfaceBlock(iface, contents, options) : void
+### TypeScriptWriter.writeInterfaceBlock(iface, contents, options) : this
 Writes a block of code, wrapped in an interface declaration and opening and closing brackets. 
 This function does not write interface members.
 Writes a block of code, wrapped in an interface declaration and opening and closing brackets. 
@@ -455,7 +455,7 @@ This function does not write interface members.
 * options: [InterfaceOptions](#interface-options)
 
    An optional InterfaceOptions object.
-### TypeScriptWriter.writeInterfaceBlock(iface, contents) : void
+### TypeScriptWriter.writeInterfaceBlock(iface, contents) : this
 Writes a block of code, wrapped in an interface declaration and opening and closing brackets. 
 This function does not write interface members.
 Writes a block of code, wrapped in an interface declaration and opening and closing brackets. 
@@ -466,15 +466,15 @@ This function does not write interface members.
 * contents: (writer: TypeScriptWriter) => void
 
    A callback function that writes the interface contents.     
-### TypeScriptWriter.writeJsDocDescription(text) : void
+### TypeScriptWriter.writeJsDocDescription(text) : this
 * text: string
-### TypeScriptWriter.writeJsDocDescription(comments) : void
+### TypeScriptWriter.writeJsDocDescription(comments) : this
 * comments: Comment
-### TypeScriptWriter.writeJsDocLines(lines) : void
+### TypeScriptWriter.writeJsDocLines(lines) : this
 * lines: string
-### TypeScriptWriter.writeJsDocParagraph(text) : void
+### TypeScriptWriter.writeJsDocParagraph(text) : this
 * text: string
-### TypeScriptWriter.writeProperty(property, options) : void
+### TypeScriptWriter.writeProperty(property, options) : this
 Writes a property from the property definition.
 Writes a class or interface property.
 * property: Property
@@ -483,7 +483,7 @@ Writes a class or interface property.
 * options: [PropertyOptions](#property-options)
 
    An optional PropertyOptions object.
-### TypeScriptWriter.writeProperty(property) : void
+### TypeScriptWriter.writeProperty(property) : this
 Writes a property from the property definition.
 Writes a class or interface property.
 * property: [PropertyDefinition](#property-definition)
@@ -491,7 +491,7 @@ Writes a class or interface property.
 Writes a block of code wrapped in a #region block.      
 * name: string
 * contents: (writer: TypeScriptWriter) => void
-### TypeScriptWriter.writeStringLiteralType(enumeration, options) : void
+### TypeScriptWriter.writeStringLiteralType(enumeration, options) : this
 Writes a string literal type from a specified enumeration. Example: 'type Easing = 'ease-in' | 'ease-out' | 'ease-in-out';'     
 * enumeration: Enumeration
 
