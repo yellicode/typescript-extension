@@ -51,7 +51,8 @@ object to control code generation (internally, the Yellicode class is transforme
 This sample creates a simple TypeScript definition of a *Task* class, which is then provided to the `TypeScriptWriter`. You would typically create this definition from another structure (your own JSON model, using the 'model' parameter).
 
 ```ts
-import { Generator, TextWriter } from '@yellicode/templating';
+import { TextWriter } from '@yellicode/core';
+import { Generator } from '@yellicode/templating';
 import { TypeScriptWriter, ClassDefinition } from '@yellicode/typescript';
 
 Generator.generate({ outputFile: './custom-sample.ts' }, (output: TextWriter) => {    
@@ -102,7 +103,8 @@ npm install @yellicode/elements --save-dev
 This template generates a TypeScript code file with all classes in the model and, for each class, write property for each class attribute.
 
 ```ts
-import { Generator, TextWriter } from '@yellicode/templating';
+import { TextWriter } from '@yellicode/core';
+import { Generator } from '@yellicode/templating';
 import { TypeScriptWriter } from '@yellicode/typescript';
 import * as elements from '@yellicode/elements';
 
