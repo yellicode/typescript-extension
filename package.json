@@ -18,8 +18,8 @@
     "url": "github:yellicode/typescript-extension.git"
   },
   "dependencies": {
-    "@yellicode/core": "^1.2.1",
-    "@yellicode/elements": "^1.2.2"
+    "@yellicode/core": "^1.2.2",
+    "@yellicode/elements": "^1.2.3"
   },
   "devDependencies": {
     "rollup": "^0.66.6"
