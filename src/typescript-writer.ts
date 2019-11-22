@@ -4,7 +4,7 @@ import * as opts from './options';
 import { CodeWriter, TextWriter, NameUtility, CodeWriterUtility } from '@yellicode/core';
 import { TypeNameProvider } from '@yellicode/elements';
 import { TypeScriptTypeNameProvider } from './typescript-type-name-provider';
-import { ClassDefinition, InterfaceDefinition, EnumDefinition, PropertyDefinition, FunctionDefinition, ParameterDefinition } from './model';
+import { ClassDefinition, InterfaceDefinition, EnumDefinition, PropertyDefinition, FunctionDefinition, ParameterDefinition, DecoratorDefinition } from './model';
 import { DefinitionBuilder } from './definition-builder';
 
 /**
@@ -67,13 +67,57 @@ export class TypeScriptWriter extends CodeWriter {
     /**
     * Writes an indented block of decorator code, wrapped in opening and closing brackets. 
     * @param contents A callback function that writes the contents.
+    * @deprecated Use writeDecorator or writeDecorators instead, or set the 'decorators' field on the property- or class definition.
     */
     public writeDecoratorCodeBlock(decoratorName: string, contents: (writer: TypeScriptWriter) => void): this {
+        console.log('TypeScriptWriter.writeDecoratorCodeBlock is deprecated. Use writeDecorator or writeDecorators instead, or set the \'decorators\' field on the property- or class definition.');
         this.writeLine(`@${decoratorName}({`);
         this.increaseIndent();
         if (contents) contents(this);
         this.decreaseIndent();
         this.writeLine('})');
+        return this;
+    }
+
+    /**
+     * Writes a decorator, either inline or on a separate line.
+     * @param definition The decorator definition.
+     * @param inline True to write the decorator inline, false to write it on its own line.
+     */
+    public writeDecorator(definition: DecoratorDefinition, inline?: boolean): this {
+        if (!inline) {
+            this.writeIndent();
+        }
+        this.write(`@${definition.name}`);
+        // Note: 'hasParameters' can be true while 'parameters' can be empty.
+        // This will result in '@MyInput()' with no parameters.
+        // However, 'parameters' having a value is the same as hasParameters being true.
+        if (definition.hasParameters || definition.parameters) {
+            this.write('(');
+            if (definition.parameters) { // 
+                if (typeof (definition.parameters) === 'string') {
+                    this.write(definition.parameters);
+                }
+                else // contents is a function
+                    definition.parameters(this);
+            } 
+            this.write(')');
+        }
+        if (inline)
+            this.write(' ');
+        else
+            this.writeEndOfLine();
+        return this;
+    }
+
+     /**
+     * Writes a decorator, either inline or on a separate line.
+     * @param definition The decorator definition.
+     */
+    public writeDecorators(decorators: DecoratorDefinition[], inline?: boolean): this {
+        decorators.forEach(d => {
+            this.writeDecorator(d, inline);
+        });
         return this;
     }
 
@@ -104,18 +148,21 @@ export class TypeScriptWriter extends CodeWriter {
     * @param contents A callback function that writes the class contents.
     * @param options An optional ClassOptions object.
     */
-    public writeClassBlock(cls: elements.Type, contents: (writer: TypeScriptWriter) => void, options?: opts.ClassOptions): this
-    public writeClassBlock(cls: any, contents: (writer: TypeScriptWriter) => void, options?: opts.ClassOptions): this {
+    public writeClassBlock(cls: elements.Type, contents: (writer: TypeScriptWriter) => void, decorators?: DecoratorDefinition[], options?: opts.ClassOptions): this
+    public writeClassBlock(cls: any, contents: (writer: TypeScriptWriter) => void, decorator?: DecoratorDefinition[], options?: opts.ClassOptions): this {
         if (!cls) return this;
 
         let definition: ClassDefinition;
         if (elements.isType(cls)) {
-            definition = this.definitionBuilder.buildClassDefinition(cls, options);
+            definition = this.definitionBuilder.buildClassDefinition(cls, decorator, options);
         }
         else definition = cls;
 
         if (definition.description) {
             this.writeJsDocLines(definition.description);
+        }
+        if (definition.decorators) {            
+            this.writeDecorators(definition.decorators, false);
         }
         this.writeIndent();
         if (definition.export) {
@@ -202,25 +249,31 @@ export class TypeScriptWriter extends CodeWriter {
      * @param property The property to write.
      * @param options An optional PropertyOptions object.
      */
-    public writeProperty(property: elements.Property, options?: opts.PropertyOptions): this
-    public writeProperty(property: any, options?: opts.PropertyOptions): this {
+    public writeProperty(property: elements.Property, decorators?: DecoratorDefinition[], options?: opts.PropertyOptions): this
+    public writeProperty(property: any, decorators?: DecoratorDefinition[], options?: opts.PropertyOptions): this {
         if (!property) return this;
 
         let definition: PropertyDefinition;
+        
         if (elements.isProperty(property)) {
-            definition = this.definitionBuilder.buildPropertyDefinition(property, options);
+            definition = this.definitionBuilder.buildPropertyDefinition(property, decorators, options);        
         }
-        else definition = property;
+        else definition = property;        
 
         const hasDefaultValue = definition.defaultValue != null; // '!= null' to allow for empty strings
 
         // Description
         if (definition.description) {
             this.writeJsDocLines(definition.description);
-        }
-        // Start a new, indented line        
+        }   
+        // Start a new, indented line
         this.writeIndent();
-        // Access modifier 
+
+        // Write inline decorator
+        if (definition.decorators) {
+            this.writeDecorators(definition.decorators, true);
+        }
+        // Access modifier
         if (definition.accessModifier) {
             this.write(`${definition.accessModifier} `);
         }

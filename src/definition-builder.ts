@@ -1,12 +1,12 @@
 import * as elements from '@yellicode/elements';
-import { ClassDefinition, InterfaceDefinition, EnumDefinition, EnumMemberDefinition, PropertyDefinition, AccessModifier, ParameterDefinition, FunctionDefinition } from './model';
+import { ClassDefinition, InterfaceDefinition, EnumDefinition, EnumMemberDefinition, PropertyDefinition, AccessModifier, ParameterDefinition, FunctionDefinition, DecoratorDefinition } from './model';
 import * as opts from './options';
 import { TypeUtility } from './type-utility';
 
 export class DefinitionBuilder {
     constructor(private typeNameProvider: elements.TypeNameProvider) {}
 
-    public buildClassDefinition(type: elements.Type, options?: opts.ClassOptions): ClassDefinition {
+    public buildClassDefinition(type: elements.Type, decorators?: DecoratorDefinition[], options?: opts.ClassOptions): ClassDefinition {
         if (!options) options = {};
 
         const definition: ClassDefinition = { name: type.name };
@@ -52,7 +52,7 @@ export class DefinitionBuilder {
             definition.export = type.visibility === elements.VisibilityKind.public || type.visibility === elements.VisibilityKind.package;
         }
         else definition.export = options.export;
-
+        definition.decorators = decorators;
         return definition;
     }
 
@@ -212,7 +212,7 @@ export class DefinitionBuilder {
         return definition;
     }
 
-    public buildPropertyDefinition(property: elements.Property, options?: opts.PropertyOptions): PropertyDefinition {
+    public buildPropertyDefinition(property: elements.Property, decorators?: DecoratorDefinition[], options?: opts.PropertyOptions): PropertyDefinition {
         if (!options) options = {};
 
         const tsTypeName = this.getFullTypeName(property, 'any')!
@@ -256,6 +256,7 @@ export class DefinitionBuilder {
 
         // Default value
         definition.defaultValue = defaultValueString;
+        definition.decorators = decorators;
         return definition;
     }
 

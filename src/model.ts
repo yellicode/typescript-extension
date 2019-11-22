@@ -1,3 +1,5 @@
+import { TypeScriptWriter } from './typescript-writer';
+
 /**
  * Enumerates the valid TypeScript access modifiers.
  */
@@ -18,6 +20,38 @@ export interface DefinitionBase {
 }
 
 /**
+ * Defines a decorator.
+ */
+export interface DecoratorDefinition {
+    /**
+     * The name of the decorator to write (excluding the '@').
+     */
+    name: string;    
+        
+    /**
+     * True to write a decorator factory call that has 0 or more parameters.
+     * This will write '@myDecorator()' instead of '@myDecorator'.
+     * The default value is false.
+     */
+    hasParameters?: boolean;
+
+    /**
+     * An optional callback function or string that writes the
+     * parameters. This field is ignored is hasParameters is false.
+     */
+    parameters?: ((writer: TypeScriptWriter) => void) | string;}
+
+/**
+ * A base interface for definitions that support decorators.
+ */
+export interface Decoratable {
+    /**
+     * Contains 0 or more decorators to be writter.
+    */
+    decorators?: DecoratorDefinition[];
+}
+
+/**
  * The base interface for class-, interface and enumeration definitions.
  */
 export interface TypeDefinition extends DefinitionBase {
@@ -34,7 +68,7 @@ export interface TypeDefinition extends DefinitionBase {
 /**
  * Represents a TypeScript property.
  */
-export interface PropertyDefinition extends DefinitionBase {
+export interface PropertyDefinition extends DefinitionBase, Decoratable {
     /**
     * The full type name of the property. If the type is an array,
     * the collection must be part of the name (e.g. 'Array<string>'
@@ -76,7 +110,7 @@ export interface PropertyDefinition extends DefinitionBase {
      * If the propery is a string property, defaultValue must be quoted string. 
      * This field is optional.
      */
-    defaultValue?: string;
+    defaultValue?: string;    
 }
 
 /**
@@ -138,7 +172,7 @@ export interface FunctionDefinition extends DefinitionBase {
     * as a null union type (e.g. 'string | null').
     */
     returnsOptional?: boolean;
-    
+
     /**
      * Gets the function's input parameters.
      */
@@ -149,7 +183,7 @@ export interface FunctionDefinition extends DefinitionBase {
 /**
  * Represents a TypeScript class.
  */
-export interface ClassDefinition extends TypeDefinition {
+export interface ClassDefinition extends TypeDefinition, Decoratable {
     /**
      * Indicates if the class should contain the 'abstract' keyword. 
      * The default value is false.
