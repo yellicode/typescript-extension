@@ -1,4 +1,5 @@
 import { TypeScriptWriter } from './typescript-writer';
+import { DefinitionBuilder } from './definition-builder';
 
 /**
  * Enumerates the valid TypeScript access modifiers.
@@ -39,14 +40,15 @@ export interface DecoratorDefinition {
      * An optional callback function or string that writes the
      * parameters. This field is ignored is hasParameters is false.
      */
-    parameters?: ((writer: TypeScriptWriter) => void) | string;}
+    parameters?: ((writer: TypeScriptWriter) => void) | string;
+}
 
 /**
  * A base interface for definitions that support decorators.
  */
 export interface Decoratable {
     /**
-     * Contains 0 or more decorators to be writter.
+     * Contains 0 or more decorators to be written.
     */
     decorators?: DecoratorDefinition[];
 }
@@ -61,6 +63,37 @@ export interface TypeDefinition extends DefinitionBase {
     export?: boolean;
     /**
      * Indicates if the 'declare' keyword should be written. The default value is false.
+     */
+    declare?: boolean;
+}
+
+/**
+ * Defines a variable (let, var or const).
+ */
+export interface VariableDefinition extends DefinitionBase {
+    /**
+    * The full type name of the variable. If the type is an array,
+    * the collection must be part of the name (e.g. 'Array<string>'
+    * or 'string[]').
+    */
+    typeName: string;
+
+    /**
+     * The default value of the property. If provided, an intitializer will be written. 
+     * If the propery is a string property, defaultValue must be quoted string.
+     * This field is optional.
+     */
+    initializer?: ((writer: TypeScriptWriter) => void) | string;    
+
+    /**
+     * Exports the variable. Only set to true when declaring the variable 
+     * at module scope.
+     */
+    export?: boolean;
+
+    /**
+     * True if this variable is a declaration (e.g. "declare const myConst: string");
+     * If true, any initializer will be ignored. The default value is false.
      */
     declare?: boolean;
 }

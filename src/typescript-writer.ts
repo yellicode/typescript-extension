@@ -4,7 +4,7 @@ import * as opts from './options';
 import { CodeWriter, TextWriter, NameUtility, CodeWriterUtility } from '@yellicode/core';
 import { TypeNameProvider } from '@yellicode/elements';
 import { TypeScriptTypeNameProvider } from './typescript-type-name-provider';
-import { ClassDefinition, InterfaceDefinition, EnumDefinition, PropertyDefinition, FunctionDefinition, ParameterDefinition, DecoratorDefinition } from './model';
+import { ClassDefinition, InterfaceDefinition, EnumDefinition, PropertyDefinition, FunctionDefinition, ParameterDefinition, DecoratorDefinition, VariableDefinition } from './model';
 import { DefinitionBuilder } from './definition-builder';
 
 /**
@@ -119,6 +119,56 @@ export class TypeScriptWriter extends CodeWriter {
             this.writeDecorator(d, inline);
         });
         return this;
+    }
+
+
+    /**
+     * Writes a variable (const or let) declaration.
+     * @param definition The variable definition.
+     * @param kind The kind of variable (const or let).
+     */
+    public writeVariableDeclaration(definition: VariableDefinition, kind: 'const' | 'let'): this {      
+        if (definition.description) {
+            // Yes, variables can have docs!
+            this.writeJsDocLines(definition.description);
+        }
+        this.writeIndent();
+        if (definition.export) {
+            this.write(`export `);
+        }
+        if (definition.declare) {
+            this.write('declare ');
+        }
+        this.write(`${kind} ${definition.name}`);
+        if (definition.typeName) {
+            this.write(`: ${definition.typeName}`);
+        }
+        if (definition.initializer && !definition.declare) {
+            this.write(' = ');
+            if (typeof (definition.initializer) === 'string') {
+                this.write(definition.initializer);
+            }
+            else
+                definition.initializer(this);
+        }
+        this.writeEndOfLine(';');
+        return this;
+    }
+
+    /**
+     * A shorthand for writeVariableDeclaration(declaration, 'const');
+     * @param definition The variable definition.
+     */
+    public writeConstDeclaration(definition: VariableDefinition): this {
+        return this.writeVariableDeclaration(definition, 'const');
+    }
+
+    /**
+     * A shorthand for writeVariableDeclaration(declaration, 'let');
+     * @param definition The variable definition.
+     */
+    public writeLetDeclaration(definition: VariableDefinition): this {
+        return this.writeVariableDeclaration(definition, 'let');
     }
 
     /**
