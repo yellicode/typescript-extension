@@ -173,7 +173,8 @@ export class DefinitionBuilder {
 
         definition.isAbstract = !isOwnedByInterface && op.isAbstract && !op.isConstructor;
         definition.isStatic = op.isStatic;
-
+        definition.isConstructor = op.isConstructor;
+        
         // Return type 
         const returnParameter = op.getReturnParameter();
         if (returnParameter) {

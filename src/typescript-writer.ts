@@ -520,12 +520,13 @@ export class TypeScriptWriter extends CodeWriter {
     }
 
     private writeFunctionStart(definition: FunctionDefinition): void {
+        const isConstructor = definition.isConstructor || definition.name === 'constructor';
         // jsDoc tags 
         var jsDocLines: string[] = [];
         if (definition.description) {
             jsDocLines.push(...definition.description);
         }
-        if (definition.parameters) {
+        if (definition.parameters && definition.description /* only writing parameter docs if there is also a description */) {
             this.pushJsDocLinesForParameters(definition.parameters, jsDocLines);
         }
         this.writeJsDocLines(jsDocLines);
@@ -538,21 +539,27 @@ export class TypeScriptWriter extends CodeWriter {
         //     this.write('declare ');
         // }
 
+
         // Start a new, indented line
         this.writeIndent();
-        // Access modifier 
-        if (definition.accessModifier) {
-            this.write(`${definition.accessModifier} `);
+        if (isConstructor) {
+            this.write('constructor');
         }
-        // Static modifier                
-        if (definition.isStatic) {
-            this.write('static ');
+        else {
+            // Access modifier 
+            if (definition.accessModifier) {
+                this.write(`${definition.accessModifier} `);
+            }
+            // Static modifier                
+            if (definition.isStatic) {
+                this.write('static ');
+            }
+            else if (definition.isAbstract) {
+                this.write('abstract ');
+            }
+            if (definition.name) this.write(definition.name);
+            else console.warn('Function definition is missing a name and is not a constructor.');
         }
-        else if (definition.isAbstract) {
-            this.write('abstract ');
-        }
-        this.write(definition.name);
-
         // If needed, make the function optional using the '?'         
         // if (definition.isOptional) {
         //     this.write('?');
@@ -560,18 +567,20 @@ export class TypeScriptWriter extends CodeWriter {
 
         this.write('(');
         if (definition.parameters) {
-            this.writeInOutParameters(definition.parameters);
-        }
-        this.write('): ');
-
+            this.writeInOutParameters(definition.parameters, isConstructor);
+        }        
+        this.write(')');
         // Write the return type                
-        this.write(definition.returnTypeName || 'void');
-        if (definition.returnsOptional) {
-            this.write(' | null');
+        if (!isConstructor) {
+            this.write(': ');            
+            this.write(definition.returnTypeName || 'void');
+            if (definition.returnsOptional) {
+                this.write(' | null');
+            }
         }
     }
 
-    private writeInOutParameters(parameters: ParameterDefinition[]): void {
+    private writeInOutParameters(parameters: ParameterDefinition[], isConstructor: boolean): void {
         let i = 0;
         parameters.forEach((p: ParameterDefinition) => {
             if (p.isReturn)
@@ -579,6 +588,9 @@ export class TypeScriptWriter extends CodeWriter {
 
             if (i > 0) {
                 this.write(', ');
+            }
+            if (isConstructor && p.accessModifier){
+                this.write(`${p.accessModifier} `);
             }
             this.write(p.name);
             if (p.isOptional && (p.useQuestionToken)) {

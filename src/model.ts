@@ -6,14 +6,17 @@ import { DefinitionBuilder } from './definition-builder';
  */
 export type AccessModifier = 'public' | 'private' | 'protected';
 
+export interface NamedDefinition {
+    /**
+     * Get or sets the name of the code element. 
+     */
+    name: string;
+}
+
 /**
  * The base interface for all TypeScript definitions. 
  */
-export interface DefinitionBase {
-    /**
-     * Get or sets the name of the code element. This field is required.
-     */
-    name: string;
+export interface DefinitionBase { 
     /**
     * Gets the description of the element. This field is optional.
     */
@@ -56,7 +59,7 @@ export interface Decoratable {
 /**
  * The base interface for class-, interface and enumeration definitions.
  */
-export interface TypeDefinition extends DefinitionBase {
+export interface TypeDefinition extends DefinitionBase, NamedDefinition {
     /**
      * Indicates if the 'export' keyword should be written. The default value is false.
      */
@@ -70,7 +73,7 @@ export interface TypeDefinition extends DefinitionBase {
 /**
  * Defines a variable (let, var or const).
  */
-export interface VariableDefinition extends DefinitionBase {
+export interface VariableDefinition extends DefinitionBase, NamedDefinition {
     /**
     * The full type name of the variable. If the type is an array,
     * the collection must be part of the name (e.g. 'Array<string>'
@@ -101,7 +104,7 @@ export interface VariableDefinition extends DefinitionBase {
 /**
  * Represents a TypeScript property.
  */
-export interface PropertyDefinition extends DefinitionBase, Decoratable {
+export interface PropertyDefinition extends DefinitionBase, NamedDefinition, Decoratable {
     /**
     * The full type name of the property. If the type is an array,
     * the collection must be part of the name (e.g. 'Array<string>'
@@ -149,7 +152,7 @@ export interface PropertyDefinition extends DefinitionBase, Decoratable {
 /**
  * Represents a TypeScript function parameter.
  */
-export interface ParameterDefinition extends DefinitionBase {
+export interface ParameterDefinition extends DefinitionBase, NamedDefinition {
     /**
      * The full type name of the parameter. If the type is a collection,
      * the collection must be part of the name (e.g. 'string[]').
@@ -174,12 +177,24 @@ export interface ParameterDefinition extends DefinitionBase {
      * instead of using a null union type.
      */
     useQuestionToken?: boolean;
+
+    /**
+     * The parameter's access modifier. Only set this property for property assignment using
+     * constructor arguments.
+     */
+    accessModifier?: AccessModifier;
 }
 
 /**
  * Represents a TypeScript function.
  */
 export interface FunctionDefinition extends DefinitionBase {
+     /**
+     * Get or sets the name of the function. This field is required,
+     * except when isConstructor is true.
+     */
+    name?: string | 'constructor';
+
     /**
     * Gets the function's access modifier. By default, no access modifier will be written.
     */
@@ -210,6 +225,11 @@ export interface FunctionDefinition extends DefinitionBase {
      * Gets the function's input parameters.
      */
     parameters?: ParameterDefinition[];
+
+    /**
+     * Indicates if the function is a constructor. 
+     */
+    isConstructor?: boolean;
 }
 
 
