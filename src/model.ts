@@ -255,13 +255,17 @@ export interface ClassDefinition extends TypeDefinition, Decoratable {
     /**
      * Gets the class properties.
      */
-    properties?: PropertyDefinition[];
+    properties?: PropertyDefinition[];   
+    /**
+     * Gets the class functions. 
+     */
+    functions?: FunctionDefinition[];
 }
 
 /**
  * Represents a TypeScript enumeration member.
  */
-export interface EnumMemberDefinition extends DefinitionBase {
+export interface EnumMemberDefinition extends DefinitionBase, NamedDefinition {
     /**
      * The value of the member, which can either be a number or a string.
      * This field is optional. If this field has a value, an initializer
@@ -290,4 +294,12 @@ export interface InterfaceDefinition extends TypeDefinition {
     * This field is optional.
     */
     extends?: string[];
+     /**
+     * Gets the interface properties.
+     */
+    properties?: PropertyDefinition[];
+    /**
+     * Gets the interface functions. 
+     */
+    functions?: FunctionDefinition[];
 }
