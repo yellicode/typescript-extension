@@ -468,15 +468,15 @@ export class TypeScriptWriter extends CodeWriter {
     * @param func The operation. 
     * @param contents A callback that writes the operation contents.  
     */
-    public writeFunctionBlock(func: FunctionDefinition, contents: (writer: TypeScriptWriter, op: elements.Operation) => void): this;
+    public writeFunctionBlock(func: FunctionDefinition, contents: (writer: TypeScriptWriter) => void): this;
     /**
     * Writes a block of code, wrapped in an function declaration and opening and closing brackets.  
     * @param operation The operation. 
     * @param contents A callback that writes the operation contents.
     * @param options An optional FunctionOptions object.
     */
-    public writeFunctionBlock(operation: elements.Operation, contents: (writer: TypeScriptWriter, op: elements.Operation) => void, options?: opts.FunctionOptions): this;
-    public writeFunctionBlock(func: elements.Operation, contents: (writer: TypeScriptWriter, op: elements.Operation) => void, options?: opts.FunctionOptions): this {
+    public writeFunctionBlock(operation: elements.Operation, contents: (writer: TypeScriptWriter) => void, options?: opts.FunctionOptions): this;
+    public writeFunctionBlock(func: elements.Operation, contents: (writer: TypeScriptWriter) => void, options?: opts.FunctionOptions): this {
         if (!func) return this;
 
         let definition: FunctionDefinition;
@@ -489,8 +489,12 @@ export class TypeScriptWriter extends CodeWriter {
             this.writeEndOfLine(';');
             return this;
         }
-        this.writeEndOfLine();
-        this.writeCodeBlock((writer) => { contents(writer, func) });
+        else 
+            this.writeEndOfLine(' {');
+        this.increaseIndent();
+        if (contents) contents(this);
+        this.decreaseIndent();
+        this.writeLine('}');        
         return this;
     }
 
@@ -519,7 +523,7 @@ export class TypeScriptWriter extends CodeWriter {
         return null;
     }
 
-    private writeFunctionStart(definition: FunctionDefinition): void {
+    protected writeFunctionStart(definition: FunctionDefinition): void {
         const isConstructor = definition.isConstructor || definition.name === 'constructor';
         // jsDoc tags 
         var jsDocLines: string[] = [];
@@ -580,7 +584,7 @@ export class TypeScriptWriter extends CodeWriter {
         }
     }
 
-    private writeInOutParameters(parameters: ParameterDefinition[], isConstructor: boolean): void {
+    protected writeInOutParameters(parameters: ParameterDefinition[], isConstructor: boolean): void {
         let i = 0;
         parameters.forEach((p: ParameterDefinition) => {
             if (p.isReturn)
