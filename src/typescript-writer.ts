@@ -36,6 +36,19 @@ export class TypeScriptWriter extends CodeWriter {
     }
 
     /**
+    * Writes an indented block of code, wrapped in opening and closing brackets. 
+    * @param contents A callback function that writes the contents.
+    */
+    public writeCodeBlock(contents: (writer: TypeScriptWriter) => void): this {
+        this.writeLine('{');
+        this.increaseIndent();
+        if (contents) contents(this);
+        this.decreaseIndent();
+        this.writeLine('}');
+        return this;
+    };
+
+    /**
      * Writes an import statement that imports the specified exports from the
      * specified module. 
      * @param moduleName The module to import from.
@@ -64,6 +77,7 @@ export class TypeScriptWriter extends CodeWriter {
         return this;
     }
 
+    // #region decorators
     /**
     * Writes an indented block of decorator code, wrapped in opening and closing brackets. 
     * @param contents A callback function that writes the contents.
@@ -121,7 +135,9 @@ export class TypeScriptWriter extends CodeWriter {
         return this;
     }
 
+    // #endregion decorators
 
+    // #region variables
     /**
      * Writes a variable (const or let) declaration.
      * @param definition The variable definition.
@@ -170,19 +186,9 @@ export class TypeScriptWriter extends CodeWriter {
     public writeLetDeclaration(definition: VariableDefinition): this {
         return this.writeVariableDeclaration(definition, 'let');
     }
-
-    /**
-    * Writes an indented block of code, wrapped in opening and closing brackets. 
-    * @param contents A callback function that writes the contents.
-    */
-    public writeCodeBlock(contents: (writer: TypeScriptWriter) => void): this {
-        this.writeLine('{');
-        this.increaseIndent();
-        if (contents) contents(this);
-        this.decreaseIndent();
-        this.writeLine('}');
-        return this;
-    };
+    // #endregion variables
+ 
+    // #region classes/interfaces
 
     /**
     * Writes a block of code, wrapped in a class declaration and opening and closing brackets. 
@@ -289,6 +295,26 @@ export class TypeScriptWriter extends CodeWriter {
         return this;
     }
 
+    private writeExtends(ext: string[]): void {
+        if (ext.length === 0)
+            return;
+
+        this.write(' extends ');
+        this.joinWrite(ext, ', ', name => name);
+    }
+
+    private writeImplements(impl: string[]): void {
+        if (impl.length === 0)
+            return;
+
+        this.write(' implements ');
+        this.joinWrite(impl, ', ', name => name);
+    }
+
+    // #endregion classes/interfaces
+
+    // #region properties
+
     /**
      * Writes a property from the property definition.
      * @param property 
@@ -355,6 +381,10 @@ export class TypeScriptWriter extends CodeWriter {
         this.writeEndOfLine(';');
         return this;
     }
+
+    // #endregion properties
+
+    // #region enumerations
 
     /**
     * Writes a full enumeration, including members.   
@@ -439,6 +469,9 @@ export class TypeScriptWriter extends CodeWriter {
         return this;
     }
 
+    // #endregion enumerations
+
+    // #region functions
     /**
      * Writes a function declaration without a body.     
      * @param operation The function definition.      
@@ -608,22 +641,9 @@ export class TypeScriptWriter extends CodeWriter {
         });
     }
 
-    private writeExtends(ext: string[]): void {
-        if (ext.length === 0)
-            return;
+    // #endregion functions
 
-        this.write(' extends ');
-        this.joinWrite(ext, ', ', name => name);
-    }
-
-    private writeImplements(impl: string[]): void {
-        if (impl.length === 0)
-            return;
-
-        this.write(' implements ');
-        this.joinWrite(impl, ', ', name => name);
-    }
-
+    // #region JSDoc
     private pushJsDocLinesFromComments(comments: elements.Comment[], lines: string[]): void {
         if (!comments)
             return;
@@ -702,6 +722,9 @@ export class TypeScriptWriter extends CodeWriter {
         return this;
     }
 
+    // #endregion JSDoc
+
+    // #region utilities
     private joinWrite<TItem>(collection: TItem[], separator: string, getStringFunc: (item: TItem) => string | null) {
         let isFirst: boolean = true;
         collection.forEach(c => {
@@ -734,4 +757,7 @@ export class TypeScriptWriter extends CodeWriter {
         }
         return moduleName;
     }
+
+    // #endregion utilities
+
 }
