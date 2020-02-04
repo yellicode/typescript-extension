@@ -295,7 +295,7 @@ export class TypeScriptWriter extends CodeWriter {
         return this;
     }
 
-    private writeExtends(ext: string[]): void {
+    protected /* virtual */ writeExtends(ext: string[]): void {
         if (ext.length === 0)
             return;
 
@@ -303,7 +303,7 @@ export class TypeScriptWriter extends CodeWriter {
         this.joinWrite(ext, ', ', name => name);
     }
 
-    private writeImplements(impl: string[]): void {
+    protected /* virtual */ writeImplements(impl: string[]): void {
         if (impl.length === 0)
             return;
 
@@ -501,15 +501,15 @@ export class TypeScriptWriter extends CodeWriter {
     * @param func The operation. 
     * @param contents A callback that writes the operation contents.  
     */
-    public writeFunctionBlock(func: FunctionDefinition, contents: (writer: TypeScriptWriter) => void): this;
+    public writeFunctionBlock(func: FunctionDefinition, contents?: (writer: TypeScriptWriter) => void): this;
     /**
     * Writes a block of code, wrapped in an function declaration and opening and closing brackets.  
     * @param operation The operation. 
     * @param contents A callback that writes the operation contents.
     * @param options An optional FunctionOptions object.
     */
-    public writeFunctionBlock(operation: elements.Operation, contents: (writer: TypeScriptWriter) => void, options?: opts.FunctionOptions): this;
-    public writeFunctionBlock(func: elements.Operation, contents: (writer: TypeScriptWriter) => void, options?: opts.FunctionOptions): this {
+    public writeFunctionBlock(operation: elements.Operation, contents?: (writer: TypeScriptWriter) => void, options?: opts.FunctionOptions): this;
+    public writeFunctionBlock(func: elements.Operation, contents?: (writer: TypeScriptWriter) => void, options?: opts.FunctionOptions): this {
         if (!func) return this;
 
         let definition: FunctionDefinition;
@@ -520,12 +520,14 @@ export class TypeScriptWriter extends CodeWriter {
         this.writeFunctionStart(definition);
         if (definition.isAbstract) {
             this.writeEndOfLine(';');
-            return this;
-        }
-        else 
-            this.writeEndOfLine(' {');
+            return this; // done             
+        }      
+        if (!contents) 
+            return this.writeEndOfLine(' {}');
+
+        this.writeEndOfLine(' {');
         this.increaseIndent();
-        if (contents) contents(this);
+        contents(this);
         this.decreaseIndent();
         this.writeLine('}');        
         return this;
@@ -604,7 +606,7 @@ export class TypeScriptWriter extends CodeWriter {
 
         this.write('(');
         if (definition.parameters) {
-            this.writeInOutParameters(definition.parameters, isConstructor);
+            this.writeInOutParameters(definition.parameters, isConstructor, definition.multiLineSignature);
         }        
         this.write(')');
         // Write the return type                
@@ -617,16 +619,26 @@ export class TypeScriptWriter extends CodeWriter {
         }
     }
 
-    protected writeInOutParameters(parameters: ParameterDefinition[], isConstructor: boolean): void {
+    protected writeInOutParameters(parameters: ParameterDefinition[], isConstructor: boolean, multiLine?: boolean): void {
         let i = 0;
+        if (!parameters.length) 
+            return;
+
+        if (multiLine) this.increaseIndent();
         parameters.forEach((p: ParameterDefinition) => {
             if (p.isReturn)
-                return;
+                return;            
+
+            if (i === 0 && multiLine) {
+                this.writeEndOfLine(); // we are at 'myFunction(', so end this line first
+            }
 
             if (i > 0) {
-                this.write(', ');
+                if (multiLine) this.writeEndOfLine(', ');
+                else this.write(', ');
             }
-            if (isConstructor && p.accessModifier){
+            if (multiLine) this.writeIndent();
+            if (isConstructor && p.accessModifier) {
                 this.write(`${p.accessModifier} `);
             }
             this.write(p.name);
@@ -636,9 +648,13 @@ export class TypeScriptWriter extends CodeWriter {
             this.write(`: ${p.typeName}`);
             if (p.isOptional && !p.useQuestionToken) {
                 this.write(' | null');
-            }
+            }            
             i++;
         });
+        if (multiLine) {            
+            this.writeEndOfLine() 
+            .decreaseIndent().writeIndent() // make the closing ')' appear on the next line
+        }
     }
 
     // #endregion functions

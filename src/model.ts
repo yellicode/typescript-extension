@@ -227,6 +227,11 @@ export interface FunctionDefinition extends DefinitionBase {
     parameters?: ParameterDefinition[];
 
     /**
+     * Causes each parameter to be written on a separate line.
+     */
+    multiLineSignature?: boolean;
+
+    /**
      * Indicates if the function is a constructor. 
      */
     isConstructor?: boolean;
