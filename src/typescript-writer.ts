@@ -8,7 +8,7 @@ import { ClassDefinition, InterfaceDefinition, EnumDefinition, PropertyDefinitio
 import { DefinitionBuilder } from './definition-builder';
 
 /**
- * Provides code writing functionality specific for TypeScript. 
+ * Provides code writing functionality specific for TypeScript.
  */
 export class TypeScriptWriter extends CodeWriter {
     private typeNameProvider: TypeNameProvider;
@@ -26,7 +26,7 @@ export class TypeScriptWriter extends CodeWriter {
     }
 
     /**
-     * Writes a block of code wrapped in a #region block.      
+     * Writes a block of code wrapped in a #region block.
      */
     public writeRegionBlock(name: string, contents: (writer: TypeScriptWriter) => void): this {
         this.writeLine(`//#region ${name}`);
@@ -36,7 +36,7 @@ export class TypeScriptWriter extends CodeWriter {
     }
 
     /**
-    * Writes an indented block of code, wrapped in opening and closing brackets. 
+    * Writes an indented block of code, wrapped in opening and closing brackets.
     * @param contents A callback function that writes the contents.
     */
     public writeCodeBlock(contents: (writer: TypeScriptWriter) => void): this {
@@ -50,7 +50,7 @@ export class TypeScriptWriter extends CodeWriter {
 
     /**
      * Writes an import statement that imports the specified exports from the
-     * specified module. 
+     * specified module.
      * @param moduleName The module to import from.
      * @param exports The name(s) of the export(s) to be imported.
      * @param alias The alias under which the module should be imported.
@@ -79,7 +79,7 @@ export class TypeScriptWriter extends CodeWriter {
 
     // #region decorators
     /**
-    * Writes an indented block of decorator code, wrapped in opening and closing brackets. 
+    * Writes an indented block of decorator code, wrapped in opening and closing brackets.
     * @param contents A callback function that writes the contents.
     * @deprecated Use writeDecorator or writeDecorators instead, or set the 'decorators' field on the property- or class definition.
     */
@@ -108,13 +108,13 @@ export class TypeScriptWriter extends CodeWriter {
         // However, 'parameters' having a value is the same as hasParameters being true.
         if (definition.hasParameters || definition.parameters) {
             this.write('(');
-            if (definition.parameters) { // 
+            if (definition.parameters) { //
                 if (typeof (definition.parameters) === 'string') {
                     this.write(definition.parameters);
                 }
                 else // contents is a function
                     definition.parameters(this);
-            } 
+            }
             this.write(')');
         }
         if (inline)
@@ -143,7 +143,7 @@ export class TypeScriptWriter extends CodeWriter {
      * @param definition The variable definition.
      * @param kind The kind of variable (const or let).
      */
-    public writeVariableDeclaration(definition: VariableDefinition, kind: 'const' | 'let'): this {      
+    public writeVariableDeclaration(definition: VariableDefinition, kind: 'const' | 'let'): this {
         if (definition.description) {
             // Yes, variables can have docs!
             this.writeJsDocLines(definition.description);
@@ -187,19 +187,19 @@ export class TypeScriptWriter extends CodeWriter {
         return this.writeVariableDeclaration(definition, 'let');
     }
     // #endregion variables
- 
+
     // #region classes/interfaces
 
     /**
-    * Writes a block of code, wrapped in a class declaration and opening and closing brackets. 
+    * Writes a block of code, wrapped in a class declaration and opening and closing brackets.
     * This function does not write class members.
-    * @param definition The class definition.   
-    * @param contents A callback function that writes the class contents.   
+    * @param definition The class definition.
+    * @param contents A callback function that writes the class contents.
     */
     public writeClassBlock(cls: ClassDefinition, contents: (writer: TypeScriptWriter) => void): this
     /**
-     * Writes a block of code, wrapped in a class declaration and opening and closing brackets. 
-    * This function does not write class members.   
+     * Writes a block of code, wrapped in a class declaration and opening and closing brackets.
+    * This function does not write class members.
     * @param type A model type from which to create the class block.
     * @param contents A callback function that writes the class contents.
     * @param options An optional ClassOptions object.
@@ -217,7 +217,7 @@ export class TypeScriptWriter extends CodeWriter {
         if (definition.description) {
             this.writeJsDocLines(definition.description);
         }
-        if (definition.decorators) {            
+        if (definition.decorators) {
             this.writeDecorators(definition.decorators, false);
         }
         this.writeIndent();
@@ -247,14 +247,14 @@ export class TypeScriptWriter extends CodeWriter {
     }
 
     /**
-      * Writes a block of code, wrapped in an interface declaration and opening and closing brackets. 
+      * Writes a block of code, wrapped in an interface declaration and opening and closing brackets.
       * This function does not write interface members.
       * @param iface The interface.
-      * @param contents A callback function that writes the interface contents.     
+      * @param contents A callback function that writes the interface contents.
       */
     public writeInterfaceBlock(iface: InterfaceDefinition, contents: (writer: TypeScriptWriter) => void): this
     /**
-     * Writes a block of code, wrapped in an interface declaration and opening and closing brackets. 
+     * Writes a block of code, wrapped in an interface declaration and opening and closing brackets.
      * This function does not write interface members.
      * @param type A model type from which to create the interface block.
      * @param contents A callback function that writes the interface contents.
@@ -317,7 +317,7 @@ export class TypeScriptWriter extends CodeWriter {
 
     /**
      * Writes a property from the property definition.
-     * @param property 
+     * @param property
      */
     public writeProperty(property: PropertyDefinition): this
     /**
@@ -330,18 +330,18 @@ export class TypeScriptWriter extends CodeWriter {
         if (!property) return this;
 
         let definition: PropertyDefinition;
-        
+
         if (elements.isProperty(property)) {
-            definition = this.definitionBuilder.buildPropertyDefinition(property, decorators, options);        
+            definition = this.definitionBuilder.buildPropertyDefinition(property, decorators, options);
         }
-        else definition = property;        
+        else definition = property;
 
         const hasDefaultValue = definition.defaultValue != null; // '!= null' to allow for empty strings
 
         // Description
         if (definition.description) {
             this.writeJsDocLines(definition.description);
-        }   
+        }
         // Start a new, indented line
         this.writeIndent();
 
@@ -353,7 +353,7 @@ export class TypeScriptWriter extends CodeWriter {
         if (definition.accessModifier) {
             this.write(`${definition.accessModifier} `);
         }
-        // Static modifier        
+        // Static modifier
         if (definition.isStatic) {
             this.write('static ');
         }
@@ -376,10 +376,29 @@ export class TypeScriptWriter extends CodeWriter {
         }
         // Initializer
         if (hasDefaultValue) {
-            this.write(` = ${definition.defaultValue}`);
+            this.write(' = ');
+            this.writePropertyDefaultValue(definition.defaultValue);
         }
         this.writeEndOfLine(';');
         return this;
+    }
+
+    protected writePropertyDefaultValue(value: any) {
+        const typeOfValue = typeof (value);
+        switch (typeOfValue) {
+            case 'number':
+                this.write(value);
+                break;
+            case 'boolean':
+                this.write(value ? 'true' : 'false');
+                break;
+            case 'string':
+                this.write(`'${value}'`);
+                break;
+            default:
+                this.writeObject(value);
+                break;
+        }
     }
 
     // #endregion properties
@@ -387,13 +406,13 @@ export class TypeScriptWriter extends CodeWriter {
     // #region enumerations
 
     /**
-    * Writes a full enumeration, including members.   
-    * @param element The enumeration.          
+    * Writes a full enumeration, including members.
+    * @param element The enumeration.
     */
     public writeEnumeration(enumeration: EnumDefinition): this
     /**
-    * Writes a full enumeration, including members.   
-    * @param element The enumeration.     
+    * Writes a full enumeration, including members.
+    * @param element The enumeration.
     * @param options An optional EnumerationOptions object.
     */
     public writeEnumeration(enumeration: elements.Enumeration, options?: opts.EnumOptions): this
@@ -447,8 +466,8 @@ export class TypeScriptWriter extends CodeWriter {
     }
 
     /**
-     * Writes a string literal type from a specified enumeration. Example: 'type Easing = 'ease-in' | 'ease-out' | 'ease-in-out';'     
-     * @param enumeration The enumeration.     
+     * Writes a string literal type from a specified enumeration. Example: 'type Easing = 'ease-in' | 'ease-out' | 'ease-in-out';'
+     * @param enumeration The enumeration.
      * @param prefix An optional prefix, such as 'export'.
      */
     public writeStringLiteralType(enumeration: elements.Enumeration, options?: opts.StringLiteralOptions): this {
@@ -473,13 +492,13 @@ export class TypeScriptWriter extends CodeWriter {
 
     // #region functions
     /**
-     * Writes a function declaration without a body.     
-     * @param operation The function definition.      
+     * Writes a function declaration without a body.
+     * @param operation The function definition.
      */
     public writeFunctionDeclaration(funct: FunctionDefinition): this
     /**
-     * Writes a function declaration without a body.     
-     * @param operation The operation. 
+     * Writes a function declaration without a body.
+     * @param operation The operation.
      * @param options An optional FunctionOptions object.
      */
     public writeFunctionDeclaration(operation: elements.Operation, options?: opts.FunctionOptions): this
@@ -497,14 +516,14 @@ export class TypeScriptWriter extends CodeWriter {
     }
 
     /**
-    * Writes a block of code, wrapped in an function declaration and opening and closing brackets. 
-    * @param func The operation. 
-    * @param contents A callback that writes the operation contents.  
+    * Writes a block of code, wrapped in an function declaration and opening and closing brackets.
+    * @param func The operation.
+    * @param contents A callback that writes the operation contents.
     */
     public writeFunctionBlock(func: FunctionDefinition, contents?: (writer: TypeScriptWriter) => void): this;
     /**
-    * Writes a block of code, wrapped in an function declaration and opening and closing brackets.  
-    * @param operation The operation. 
+    * Writes a block of code, wrapped in an function declaration and opening and closing brackets.
+    * @param operation The operation.
     * @param contents A callback that writes the operation contents.
     * @param options An optional FunctionOptions object.
     */
@@ -520,16 +539,16 @@ export class TypeScriptWriter extends CodeWriter {
         this.writeFunctionStart(definition);
         if (definition.isAbstract) {
             this.writeEndOfLine(';');
-            return this; // done             
-        }      
-        if (!contents) 
+            return this; // done
+        }
+        if (!contents)
             return this.writeEndOfLine(' {}');
 
         this.writeEndOfLine(' {');
         this.increaseIndent();
         contents(this);
         this.decreaseIndent();
-        this.writeLine('}');        
+        this.writeLine('}');
         return this;
     }
 
@@ -560,7 +579,7 @@ export class TypeScriptWriter extends CodeWriter {
 
     protected writeFunctionStart(definition: FunctionDefinition): void {
         const isConstructor = definition.isConstructor || definition.name === 'constructor';
-        // jsDoc tags 
+        // jsDoc tags
         var jsDocLines: string[] = [];
         if (definition.description) {
             jsDocLines.push(...definition.description);
@@ -585,11 +604,11 @@ export class TypeScriptWriter extends CodeWriter {
             this.write('constructor');
         }
         else {
-            // Access modifier 
+            // Access modifier
             if (definition.accessModifier) {
                 this.write(`${definition.accessModifier} `);
             }
-            // Static modifier                
+            // Static modifier
             if (definition.isStatic) {
                 this.write('static ');
             }
@@ -599,7 +618,7 @@ export class TypeScriptWriter extends CodeWriter {
             if (definition.name) this.write(definition.name);
             else console.warn('Function definition is missing a name and is not a constructor.');
         }
-        // If needed, make the function optional using the '?'         
+        // If needed, make the function optional using the '?'
         // if (definition.isOptional) {
         //     this.write('?');
         // }
@@ -607,11 +626,11 @@ export class TypeScriptWriter extends CodeWriter {
         this.write('(');
         if (definition.parameters) {
             this.writeInOutParameters(definition.parameters, isConstructor, definition.multiLineSignature);
-        }        
+        }
         this.write(')');
-        // Write the return type                
+        // Write the return type
         if (!isConstructor) {
-            this.write(': ');            
+            this.write(': ');
             this.write(definition.returnTypeName || 'void');
             if (definition.returnsOptional) {
                 this.write(' | null');
@@ -621,13 +640,13 @@ export class TypeScriptWriter extends CodeWriter {
 
     protected writeInOutParameters(parameters: ParameterDefinition[], isConstructor: boolean, multiLine?: boolean): void {
         let i = 0;
-        if (!parameters.length) 
+        if (!parameters.length)
             return;
 
         if (multiLine) this.increaseIndent();
         parameters.forEach((p: ParameterDefinition) => {
             if (p.isReturn)
-                return;            
+                return;
 
             if (i === 0 && multiLine) {
                 this.writeEndOfLine(); // we are at 'myFunction(', so end this line first
@@ -648,15 +667,37 @@ export class TypeScriptWriter extends CodeWriter {
             this.write(`: ${p.typeName}`);
             if (p.isOptional && !p.useQuestionToken) {
                 this.write(' | null');
-            }            
+            }
             i++;
         });
-        if (multiLine) {            
-            this.writeEndOfLine() 
+        if (multiLine) {
+            this.writeEndOfLine()
             .decreaseIndent().writeIndent() // make the closing ')' appear on the next line
         }
     }
 
+    public writeObject(instance: any): this {
+        // Use JSON.stringify() and then unquote property names to create javascript property names.
+        // We will do this by letting JSON.stringify create multiple lines (see the 3rd argument, force indentation).
+        // {
+        //      "Title": "My book title",
+        //      "Price": 50
+        //}
+        // The following RegExp replaces (including indent)
+        //      "myProperty":"myValue"
+        //      myProperty:"myValue"'
+        const regex: RegExp = new RegExp(/^(\s*)"([^"]+)":/g);
+        const stringified = JSON.stringify(instance, undefined, this.indentString || 1);
+        const lines = stringified.split(/\r?\n/g);
+        lines.forEach((l, i) => {
+            if (i == 0) this.writeEndOfLine(l); // writes the indent string generated by JSON.stringify
+            else {
+                const unquoted = l.replace(regex, '$1$2:');
+                this.writeLine(unquoted); // writes the current indent string + the indent string generated by JSON.stringify
+            }
+        })
+        return this;
+    }
     // #endregion functions
 
     // #region JSDoc
@@ -755,7 +796,7 @@ export class TypeScriptWriter extends CodeWriter {
     }
 
     /**
-     * Makes a TypeScript safe alias for a ES6 module name.     
+     * Makes a TypeScript safe alias for a ES6 module name.
      */
     private static makeSafeModuleName(moduleName: string): string {
         if (moduleName.startsWith('@')) {

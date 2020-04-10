@@ -8,15 +8,15 @@ export type AccessModifier = 'public' | 'private' | 'protected';
 
 export interface NamedDefinition {
     /**
-     * Get or sets the name of the code element. 
+     * Get or sets the name of the code element.
      */
     name: string;
 }
 
 /**
- * The base interface for all TypeScript definitions. 
+ * The base interface for all TypeScript definitions.
  */
-export interface DefinitionBase { 
+export interface DefinitionBase {
     /**
     * Gets the description of the element. This field is optional.
     */
@@ -30,8 +30,8 @@ export interface DecoratorDefinition {
     /**
      * The name of the decorator to write (excluding the '@').
      */
-    name: string;    
-        
+    name: string;
+
     /**
      * True to write a decorator factory call that has 0 or more parameters.
      * This will write '@myDecorator()' instead of '@myDecorator'.
@@ -82,14 +82,14 @@ export interface VariableDefinition extends DefinitionBase, NamedDefinition {
     typeName: string;
 
     /**
-     * The default value of the property. If provided, an intitializer will be written. 
+     * The default value of the property. If provided, an intitializer will be written.
      * If the propery is a string property, defaultValue must be quoted string.
      * This field is optional.
      */
-    initializer?: ((writer: TypeScriptWriter) => void) | string;    
+    initializer?: ((writer: TypeScriptWriter) => void) | string;
 
     /**
-     * Exports the variable. Only set to true when declaring the variable 
+     * Exports the variable. Only set to true when declaring the variable
      * at module scope.
      */
     export?: boolean;
@@ -124,29 +124,28 @@ export interface PropertyDefinition extends DefinitionBase, NamedDefinition, Dec
      */
     isStatic?: boolean;
     /**
-    * Indicates if the property is optional. If true, a question mark will be appended to the name 
+    * Indicates if the property is optional. If true, a question mark will be appended to the name
     * (e.g. 'FirstName?: string'), unless hasNullUnionType is true. The default value is false.
     */
     isOptional?: boolean;
     /**
      * Indicates if the property can be null. If true, '| null' will be appended to the typeName
-     * and the question mark will be omitted (e.g. 'FirstName: string|null'). This field is ignored if 
+     * and the question mark will be omitted (e.g. 'FirstName: string|null'). This field is ignored if
      * isOptional is falsy. The default value is false.
      */
     hasNullUnionType?: boolean;
     /**
-     * Writes the so-called 'definite assignment assertion modifier' for the property if the property is required. 
-     * There are certain scenarios where properties can be initialized indirectly (perhaps by a helper method or dependency injection library), 
+     * Writes the so-called 'definite assignment assertion modifier' for the property if the property is required.
+     * There are certain scenarios where properties can be initialized indirectly (perhaps by a helper method or dependency injection library),
      * in which case you can use the definite assignment assertion modifiers for your properties.
-     * The default value is false. This field is ignored if the property to write has a default value. 
+     * The default value is false. This field is ignored if the property to write has a default value.
      */
     useDefiniteAssignmentAssertionModifier?: boolean;
     /**
-     * The default value of the property. If provided, an intitializer will be written. 
-     * If the propery is a string property, defaultValue must be quoted string. 
+     * The default value of the property. If provided, an initializer will be written.
      * This field is optional.
      */
-    defaultValue?: string;    
+    defaultValue?: any;
 }
 
 /**
@@ -167,7 +166,7 @@ export interface ParameterDefinition extends DefinitionBase, NamedDefinition {
     isOptional?: boolean;
 
     /**
-     * Indicates if the parameter is a return parameter. The return parameter will 
+     * Indicates if the parameter is a return parameter. The return parameter will
      * not be written as a function parameter, but is used to write a JSDoc '@returns' comment.
      */
     isReturn?: boolean;
@@ -201,7 +200,7 @@ export interface FunctionDefinition extends DefinitionBase {
     accessModifier?: AccessModifier;
 
     /**
-     * Indicates if the function should be generated as an 'abstract' function. 
+     * Indicates if the function should be generated as an 'abstract' function.
      * The default value is false.
      */
     isAbstract?: boolean;
@@ -211,8 +210,8 @@ export interface FunctionDefinition extends DefinitionBase {
     isStatic?: boolean;
     /**
      * The full type name of the function return type. If the function returns a collection,
-     * the collection must be part of the name (e.g. 'string[]'). If this value is empty, 
-     * the function will return 'void'. 
+     * the collection must be part of the name (e.g. 'string[]'). If this value is empty,
+     * the function will return 'void'.
      */
     returnTypeName?: string;
     /**
@@ -232,7 +231,7 @@ export interface FunctionDefinition extends DefinitionBase {
     multiLineSignature?: boolean;
 
     /**
-     * Indicates if the function is a constructor. 
+     * Indicates if the function is a constructor.
      */
     isConstructor?: boolean;
 }
@@ -243,26 +242,26 @@ export interface FunctionDefinition extends DefinitionBase {
  */
 export interface ClassDefinition extends TypeDefinition, Decoratable {
     /**
-     * Indicates if the class should contain the 'abstract' keyword. 
+     * Indicates if the class should contain the 'abstract' keyword.
      * The default value is false.
      */
     isAbstract?: boolean;
     /**
-    * Contains the names of the interfaces that the class implements. 
+    * Contains the names of the interfaces that the class implements.
     * This field is optional.
     */
     implements?: string[];
     /**
-     * Contains the names of the classes that the class inherits from. 
+     * Contains the names of the classes that the class inherits from.
      * This field is optional.
      */
     extends?: string[];
     /**
      * Gets the class properties.
      */
-    properties?: PropertyDefinition[];   
+    properties?: PropertyDefinition[];
     /**
-     * Gets the class functions. 
+     * Gets the class functions.
      */
     functions?: FunctionDefinition[];
 }
@@ -274,7 +273,7 @@ export interface EnumMemberDefinition extends DefinitionBase, NamedDefinition {
     /**
      * The value of the member, which can either be a number or a string.
      * This field is optional. If this field has a value, an initializer
-     * will be written. 
+     * will be written.
      */
     value?: string | number;
 }
@@ -295,7 +294,7 @@ export interface EnumDefinition extends TypeDefinition {
  */
 export interface InterfaceDefinition extends TypeDefinition {
     /**
-    * Contains the names of the interfaces that the interface inherits from. 
+    * Contains the names of the interfaces that the interface inherits from.
     * This field is optional.
     */
     extends?: string[];
@@ -304,7 +303,7 @@ export interface InterfaceDefinition extends TypeDefinition {
      */
     properties?: PropertyDefinition[];
     /**
-     * Gets the interface functions. 
+     * Gets the interface functions.
      */
     functions?: FunctionDefinition[];
 }
