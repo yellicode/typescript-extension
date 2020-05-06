@@ -99,7 +99,7 @@ export class DefinitionBuilder {
     public buildEnumDefinition(type: elements.Type, options?: opts.EnumOptions): EnumDefinition {
         if (!options) options = {};
 
-        const definition: EnumDefinition = { name: type.name };
+        const definition: EnumDefinition = { name: type.name, const: options.const };
         const features = (options.features === undefined) ? opts.EnumFeatures.All : options.features;
 
         // Handle deprecated stuff
@@ -174,8 +174,8 @@ export class DefinitionBuilder {
         definition.isAbstract = !isOwnedByInterface && op.isAbstract && !op.isConstructor;
         definition.isStatic = op.isStatic;
         definition.isConstructor = op.isConstructor;
-        
-        // Return type 
+
+        // Return type
         const returnParameter = op.getReturnParameter();
         if (returnParameter) {
             const makeOptional = returnParameter.isOptional() ? !!(features & opts.FunctionFeatures.OptionalModifier) : false;
@@ -250,7 +250,7 @@ export class DefinitionBuilder {
         if (isOptional && !!(optionalityModifier & opts.OptionalityModifier.NullKeyword)) {
             definition.hasNullUnionType = true;
         }
-        // Use the definite definite assignment assertion modifier if the property is required and is not initialized        
+        // Use the definite definite assignment assertion modifier if the property is required and is not initialized
         if (!isOptional && !defaultValueString && !isOwnedByInterface && !!(features & opts.PropertyFeatures.DefiniteAssignmentAssertionModifier)) {
             definition.useDefiniteAssignmentAssertionModifier = true;
         }

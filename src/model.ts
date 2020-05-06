@@ -286,6 +286,11 @@ export interface EnumDefinition extends TypeDefinition {
      * Contains the enumeration members. This field is optional.
      */
     members?: EnumMemberDefinition[];
+     /**
+     * True if the enum should be a const enum. Const enums can only use constant enum expressions and
+     * unlike regular enums they are completely removed during compilation.
+     */
+    const?: boolean;
 }
 
 

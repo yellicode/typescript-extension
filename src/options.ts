@@ -5,7 +5,7 @@
  */
 export enum OptionalityModifier {
     /**
-     * Don't write any modifier. 
+     * Don't write any modifier.
      */
     Ignore = 0,
     /**
@@ -35,7 +35,7 @@ export enum EnumFeatures {
     None = 0,
     JsDocDescription = 1 << 0,
     Initializers = 1 << 1,
-    All = JsDocDescription | Initializers    
+    All = JsDocDescription | Initializers
 }
 
 export interface EnumOptions {
@@ -49,13 +49,18 @@ export interface EnumOptions {
      * True if the class definition should contain the 'declare' keyword.
      */
     declare?: boolean;
-    /** 
+    /**
+     * True if the enum should be a const enum. Const enums can only use constant enum expressions and
+     * unlike regular enums they are completely removed during compilation.
+     */
+    const?: boolean;
+    /**
     * Any string to prefix the enum keyword with, such as "export".
     * Indicates if the class must be exported or not (using the 'export' keyword).
-    * By default, the class is exported only if it has public or package visibility.    
+    * By default, the class is exported only if it has public or package visibility.
     * @deprecated Use the 'export' or 'declare' option instead.
     */
-    prefix?: string;    
+    prefix?: string;
 }
 
 export interface StringLiteralOptions {
@@ -75,7 +80,7 @@ export enum ClassFeatures {
     JsDocDescription = 1 << 0,
     Generalizations = 1 << 1,
     InterfaceRealizations = 1 << 2,
-    All = JsDocDescription | Generalizations | InterfaceRealizations 
+    All = JsDocDescription | Generalizations | InterfaceRealizations
 }
 
 export interface ClassOptions {
@@ -100,10 +105,10 @@ export interface ClassOptions {
      * True if the class definition should contain the 'declare' keyword.
      */
     declare?: boolean;
-    /** 
+    /**
     * Any string to prefix the class keyword with, such as "export".
     * Indicates if the class must be exported or not (using the 'export' keyword).
-    * By default, the class is exported only if it has public or package visibility.    
+    * By default, the class is exported only if it has public or package visibility.
     * @deprecated Use the 'export' or 'declare' option instead.
     */
     prefix?: string;
@@ -113,7 +118,7 @@ export enum InterfaceFeatures {
     None = 0,
     JsDocDescription = 1 << 0,
     Generalizations = 1 << 1,
-    All = JsDocDescription | Generalizations 
+    All = JsDocDescription | Generalizations
 }
 
 export interface InterfaceOptions {
@@ -134,10 +139,10 @@ export interface InterfaceOptions {
      * True if the interface definition should contain the 'declare' keyword.
      */
     declare?: boolean;
-    /** 
+    /**
    * Any string to prefix the interface keyword with, such as "export".
    * Indicates if the class must be exported or not (using the 'export' keyword).
-   * By default, the class is exported only if it has public or package visibility.    
+   * By default, the class is exported only if it has public or package visibility.
    * @deprecated Use the 'export' or 'declare' option instead.
    */
     prefix?: string;
@@ -148,11 +153,11 @@ export enum PropertyFeatures {
     JsDocDescription = 1 << 0,
     AccessModifier = 1 << 1,
     ReadonlyModifier = 1 << 2,
-    OptionalModifier = 1 << 3,    
+    OptionalModifier = 1 << 3,
     Initializer = 1 << 4,
     /**
-     * Writes the so-called 'definite assignment assertion modifier' for the property if the property is required. 
-     * There are certain scenarios where properties can be initialized indirectly (perhaps by a helper method or dependency injection library), 
+     * Writes the so-called 'definite assignment assertion modifier' for the property if the property is required.
+     * There are certain scenarios where properties can be initialized indirectly (perhaps by a helper method or dependency injection library),
      * in which case you can use the definite assignment assertion modifiers for your properties.
      */
     DefiniteAssignmentAssertionModifier = 1 << 5,
@@ -160,7 +165,7 @@ export enum PropertyFeatures {
     /**
      * Include all features, except the ones that are not usable on interface properties.
      */
-    AllInterfaceProperty = PropertyFeatures.All & ~PropertyFeatures.AccessModifier & ~PropertyFeatures.Initializer & ~PropertyFeatures.DefiniteAssignmentAssertionModifier 
+    AllInterfaceProperty = PropertyFeatures.All & ~PropertyFeatures.AccessModifier & ~PropertyFeatures.Initializer & ~PropertyFeatures.DefiniteAssignmentAssertionModifier
 }
 
 export interface PropertyOptions {
@@ -173,42 +178,42 @@ export interface PropertyOptions {
      */
     optionality?: OptionalityModifier;
     /**
-    * Set to true to initialize an array property with an empty array, or with null if the property is optional (has a lower bound of 0) 
+    * Set to true to initialize an array property with an empty array, or with null if the property is optional (has a lower bound of 0)
     * and optionality is OptionalityModifier.NullKeyword. The default value is false.
     */
     initializeArray?: boolean;
     /**
      * Set to true to initialize a primitive property (Boolean, Number and String) with the type's default value (false, 0 and '') in case it is required and
-     * doesn't have a default value in the model. If the property doesn't have a default value in the model, is optional and optionality is 
+     * doesn't have a default value in the model. If the property doesn't have a default value in the model, is optional and optionality is
      * OptionalityModifier.NullKeyword, the property will be initialized with 'null'. The default value is false.
      */
     initializePrimitiveType?: boolean;
 }
 
 export enum FunctionFeatures {
-    None = 0,  
-    JsDocDescription = 1 << 0,    
+    None = 0,
+    JsDocDescription = 1 << 0,
     AccessModifier = 1 << 1,
-    OptionalModifier = 1 << 2,    
+    OptionalModifier = 1 << 2,
     All = JsDocDescription | AccessModifier | OptionalModifier
 }
 
 export enum ParameterFeatures {
-    None = 0,    
-    JsDocDescription = 1 << 0,       
-    OptionalModifier = 1 << 1,    
-    All = JsDocDescription | OptionalModifier 
+    None = 0,
+    JsDocDescription = 1 << 0,
+    OptionalModifier = 1 << 1,
+    All = JsDocDescription | OptionalModifier
 }
 
 export interface FunctionOptions {
     features?: FunctionFeatures;
-    
+
     parameterFeatures?: ParameterFeatures;
 
     /**
      * Indicates what to write when the return parameter has a lower bound of 0. The default is OptionalityModifier.NullKeyword.
      * @deprecated This option is not supported in versions higher than 1.5.1.
-     */    
+     */
     returnOptionality?: OptionalityModifier;
 
     /**
