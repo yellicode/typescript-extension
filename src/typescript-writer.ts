@@ -383,7 +383,7 @@ export class TypeScriptWriter extends CodeWriter {
         return this;
     }
 
-    protected writePropertyDefaultValue(value: any) {
+    protected writePropertyDefaultValue(value: any | ((output: TypeScriptWriter) => void)) {
         const typeOfValue = typeof (value);
         switch (typeOfValue) {
             case 'number':
@@ -394,6 +394,9 @@ export class TypeScriptWriter extends CodeWriter {
                 break;
             case 'string':
                 this.write(`'${value}'`);
+                break;
+            case 'function': // (output: TypeScriptWriter) => void;
+                value(this);
                 break;
             default:
                 this.writeObject(value, true);

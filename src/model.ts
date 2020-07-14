@@ -145,7 +145,7 @@ export interface PropertyDefinition extends DefinitionBase, NamedDefinition, Dec
      * The default value of the property. If provided, an initializer will be written.
      * This field is optional.
      */
-    defaultValue?: any;
+    defaultValue?: any | ((output: TypeScriptWriter) => void);
 }
 
 /**
