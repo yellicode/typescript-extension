@@ -21,7 +21,7 @@ export class TypeScriptWriter extends CodeWriter {
         if (!options) options = {};
 
         this.typeNameProvider = options.typeNameProvider || new TypeScriptTypeNameProvider();
-        this.definitionBuilder = new DefinitionBuilder(this.typeNameProvider);
+        this.definitionBuilder = options.definitionBuilder || new DefinitionBuilder(this.typeNameProvider);
         this.maxCommentWidth = options.maxCommentWidth || 100;
     }
 
