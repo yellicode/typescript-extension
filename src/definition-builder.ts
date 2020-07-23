@@ -194,7 +194,7 @@ export class DefinitionBuilder {
         return definition;
     }
 
-    private buildParameterDefinition(p: elements.Parameter, features: opts.ParameterFeatures, optionalityModifier: opts.OptionalityModifier): ParameterDefinition {
+    public buildParameterDefinition(p: elements.Parameter, features: opts.ParameterFeatures, optionalityModifier: opts.OptionalityModifier): ParameterDefinition {
         const tsTypeName = this.getFullTypeName(p, 'any')!;
         const definition: ParameterDefinition = { name: p.name, typeName: tsTypeName };
         const makeOptional = p.isOptional() && !!(features & opts.ParameterFeatures.OptionalModifier);
@@ -261,7 +261,7 @@ export class DefinitionBuilder {
         return definition;
     }
 
-    private static buildImplements(cls: elements.Class, additional: string[] | undefined): string[] {
+    protected static buildImplements(cls: elements.Class, additional: string[] | undefined): string[] {
         const allNames: string[] = [];
         if (cls.interfaceRealizations) {
             allNames.push(...cls.interfaceRealizations.map(ir => ir.contract.name));
@@ -272,7 +272,7 @@ export class DefinitionBuilder {
         return allNames;
     }
 
-    private static buildExtends(type: elements.Classifier, additional: string[] | undefined): string[] {
+    protected static buildExtends(type: elements.Classifier, additional: string[] | undefined): string[] {
         const allNames: string[] = [];
         if (type.generalizations) {
             allNames.push(...type.generalizations.map(g => g.general.name));
@@ -283,7 +283,7 @@ export class DefinitionBuilder {
         return allNames;
     }
 
-    private static buildDescription(type: elements.Element): string[] {
+    protected static buildDescription(type: elements.Element): string[] {
         return type.ownedComments.map(c => c.body);
     }
 
@@ -332,7 +332,7 @@ export class DefinitionBuilder {
         return undefined;
     }
 
-    private getFullTypeName(typedElement: elements.TypedElement, fallback?: string): string | undefined {
+    public getFullTypeName(typedElement: elements.TypedElement, fallback?: string): string | undefined {
         const typeName = this.typeNameProvider.getTypeName(typedElement) || fallback;
         if (!typeName)
             return; // no type name and no fallback
