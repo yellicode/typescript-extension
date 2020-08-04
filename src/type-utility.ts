@@ -16,18 +16,20 @@ export class TypeUtility {
         }
     }
 
-    public static getPrimitiveTypeDefault(typeName: string | null): string | undefined {
+    public static getPrimitiveTypeDefault(typeName: string | null): any | undefined {
         if (!typeName)
             return undefined;
 
         switch (typeName.trim()) {
             case TYPE_BOOLEAN:
-                return 'false';
+                return false;
             case TYPE_STRING:
-                return `''`; // empty string
+                return ''; // empty string
             case TYPE_NUMBER:
-                return '0';
-            default: return undefined;
+                return 0;
+            default:
+                return undefined;
         }
     }
+
 }

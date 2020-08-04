@@ -334,9 +334,10 @@ export class TypeScriptWriter extends CodeWriter {
         if (elements.isProperty(property)) {
             definition = this.definitionBuilder.buildPropertyDefinition(property, decorators, options);
         }
-        else definition = property;
+        else
+            definition = property;
 
-        const hasDefaultValue = definition.defaultValue != null; // '!= null' to allow for empty strings
+        const hasDefaultValue = typeof definition.defaultValue !== undefined; // '!== undefined' to allow for empty strings and explicit null
 
         // Description
         if (definition.description) {
@@ -384,10 +385,15 @@ export class TypeScriptWriter extends CodeWriter {
     }
 
     protected writePropertyDefaultValue(value: any | ((output: TypeScriptWriter) => void)) {
+        if (value === null) {
+            // The default value was explicitly set to null.
+            this.write('null');
+            return;
+        }
         const typeOfValue = typeof (value);
         switch (typeOfValue) {
             case 'number':
-                this.write(value);
+                this.write(value.toString());
                 break;
             case 'boolean':
                 this.write(value ? 'true' : 'false');
@@ -399,7 +405,11 @@ export class TypeScriptWriter extends CodeWriter {
                 value(this);
                 break;
             default:
-                this.writeObject(value, true);
+                if (Array.isArray(value) && !value.length) {
+                    this.write('[]');
+                }
+                else
+                    this.writeObject(value, true);
                 break;
         }
     }

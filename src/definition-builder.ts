@@ -225,9 +225,9 @@ export class DefinitionBuilder {
 
         const isOptional = property.isOptional() && !!(features & opts.PropertyFeatures.OptionalModifier);
         const optionalityModifier = (options.optionality === undefined) ? opts.OptionalityModifier.QuestionToken : options.optionality;
-        const defaultValueString =
+        const defaultValue =
             ((features & opts.PropertyFeatures.Initializer) && !isOwnedByInterface) ?
-                DefinitionBuilder.getDefaultValueString(property, tsTypeName, property.defaultValue, isOptional, optionalityModifier, options.initializePrimitiveType, options.initializeArray)
+                DefinitionBuilder.getDefaultValue(property, tsTypeName, property.defaultValue, isOptional, optionalityModifier, options.initializePrimitiveType, options.initializeArray)
                 : undefined;
 
         // Description
@@ -251,12 +251,12 @@ export class DefinitionBuilder {
             definition.hasNullUnionType = true;
         }
         // Use the definite definite assignment assertion modifier if the property is required and is not initialized
-        if (!isOptional && !defaultValueString && !isOwnedByInterface && !!(features & opts.PropertyFeatures.DefiniteAssignmentAssertionModifier)) {
+        if (!isOptional && !defaultValue && !isOwnedByInterface && !!(features & opts.PropertyFeatures.DefiniteAssignmentAssertionModifier)) {
             definition.useDefiniteAssignmentAssertionModifier = true;
         }
 
         // Default value
-        definition.defaultValue = defaultValueString;
+        definition.defaultValue = defaultValue;
         definition.decorators = decorators;
         return definition;
     }
@@ -287,7 +287,7 @@ export class DefinitionBuilder {
         return type.ownedComments.map(c => c.body);
     }
 
-    public static getDefaultValueString(
+    public static getDefaultValue(
         element: elements.MultiplicityElement,
         tsTypeName: string | null,
         defaultValue: elements.ValueSpecification | null,
@@ -295,7 +295,7 @@ export class DefinitionBuilder {
         optionalityModifier: opts.OptionalityModifier,
         initializePrimitiveType?: boolean,
         initializeArray?: boolean,
-    ): string | undefined {
+    ): any | undefined {
 
         const isPrimitive = TypeUtility.isPrimitiveType(tsTypeName);
         const valueIfOptional = optionalityModifier == opts.OptionalityModifier.NullKeyword ? 'null' : undefined;
