@@ -1,4 +1,5 @@
 ﻿import { TypeNameProvider } from '@yellicode/elements';
+import {DefinitionBuilder} from "./definition-builder";
 
 /**
  * Defines options for dealing with elements that are 'optional', meaning that they have a lower bound of 0.
@@ -24,6 +25,11 @@ export interface WriterOptions {
      * The default value is 100 characters.
      */
     maxCommentWidth?: number;
+
+    /**
+     * Sets an optional DefinitionBuilder. By default, the default DefinitionBuilder is used.
+     */
+    definitionBuilder?: DefinitionBuilder;
 
     /**
     * Sets an optional TypeNameProvider. By default, the TypeScriptTypeNameProvider is used.
