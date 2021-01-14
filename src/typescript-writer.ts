@@ -454,29 +454,29 @@ export class TypeScriptWriter extends CodeWriter {
 
         this.write(`enum ${enumeration.name}`);
         this.writeEndOfLine(' {');
-        this.increaseIndent();
 
-        if (!definition.members)
-            return this;
-
-        for (let i = 0, len = definition.members.length; i < len; i++) {
-            const member = definition.members[i];
-            if (member.description) {
-                this.writeJsDocLines(member.description);
+        if (definition.members) {
+            this.increaseIndent();
+            for (let i = 0, len = definition.members.length; i < len; i++) {
+                const member = definition.members[i];
+                if (member.description) {
+                    this.writeJsDocLines(member.description);
+                }
+                this.writeIndent();
+                this.write(member.name);
+                if (member.value || member.value === 0) {
+                    const initialValue = (typeof member.value === "number") ?
+                        member.value.toString() : `'${member.value}'`; // a string enum: wrap in quotes
+                    this.write(` = ${initialValue}`);
+                }
+                if (i < len - 1) {
+                    this.write(',');
+                }
+                this.writeEndOfLine();
             }
-            this.writeIndent();
-            this.write(member.name);
-            if (member.value || member.value === 0) {
-                const initialValue = (typeof member.value === "number") ?
-                    member.value.toString() : `'${member.value}'`; // a string enum: wrap in quotes
-                this.write(` = ${initialValue}`);
-            }
-            if (i < len - 1) {
-                this.write(',');
-            }
-            this.writeEndOfLine();
+            this.decreaseIndent();
         }
-        this.decreaseIndent();
+
         this.writeLine('}');
         return this;
     }
