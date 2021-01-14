@@ -4,6 +4,7 @@
         "module": "es2015",
         "outDir": "dist/es5",
         "strict": true,
+        "skipLibCheck": true,
         "moduleResolution": "node",
         "inlineSourceMap": false,
         "lib": [
