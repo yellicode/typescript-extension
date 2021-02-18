@@ -337,7 +337,8 @@ export class TypeScriptWriter extends CodeWriter {
         else
             definition = property;
 
-        const hasDefaultValue = typeof definition.defaultValue !== 'undefined'; // '!== undefined' to allow for empty strings and explicit null
+        const t = typeof definition.defaultValue;
+        const hasDefaultValue = t !== 'undefined'; // '!== undefined' to allow for empty strings and explicit null
 
         // Description
         if (definition.description) {
