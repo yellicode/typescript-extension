@@ -4,7 +4,7 @@ import * as opts from './options';
 import { CodeWriter, TextWriter, NameUtility, CodeWriterUtility } from '@yellicode/core';
 import { TypeNameProvider } from '@yellicode/elements';
 import { TypeScriptTypeNameProvider } from './typescript-type-name-provider';
-import { ClassDefinition, InterfaceDefinition, EnumDefinition, PropertyDefinition, FunctionDefinition, ParameterDefinition, DecoratorDefinition, VariableDefinition } from './model';
+import { ClassDefinition, InterfaceDefinition, EnumDefinition, PropertyDefinition, FunctionDefinition, ParameterDefinition, DecoratorDefinition, VariableDefinition, HasJsDocTags } from './model';
 import { DefinitionBuilder } from './definition-builder';
 
 /**
@@ -145,8 +145,7 @@ export class TypeScriptWriter extends CodeWriter {
      */
     public writeVariableDeclaration(definition: VariableDefinition, kind: 'const' | 'let'): this {
         if (definition.description) {
-            // Yes, variables can have docs!
-            this.writeJsDocLines(definition.description);
+            this.writeJsDocLines(definition.description); // Yes, variables can have docs!
         }
         this.writeIndent();
         if (definition.export) {
@@ -214,9 +213,8 @@ export class TypeScriptWriter extends CodeWriter {
         }
         else definition = cls;
 
-        if (definition.description) {
-            this.writeJsDocLines(definition.description);
-        }
+        this.writeJsDocLines(definition.description, definition);
+
         if (definition.decorators) {
             this.writeDecorators(definition.decorators, false);
         }
@@ -270,9 +268,7 @@ export class TypeScriptWriter extends CodeWriter {
         }
         else definition = iface;
 
-        if (definition.description) {
-            this.writeJsDocLines(definition.description);
-        }
+        this.writeJsDocLines(definition.description, definition);
         this.writeIndent();
         if (definition.export) {
             this.write(`export `);
@@ -341,9 +337,8 @@ export class TypeScriptWriter extends CodeWriter {
         const hasDefaultValue = t !== 'undefined'; // '!== undefined' to allow for empty strings and explicit null
 
         // Description
-        if (definition.description) {
-            this.writeJsDocLines(definition.description);
-        }
+        this.writeJsDocLines(definition.description, definition);
+
         // Start a new, indented line
         this.writeIndent();
 
@@ -439,9 +434,7 @@ export class TypeScriptWriter extends CodeWriter {
         }
         else definition = enumeration;
 
-        if (definition.description) {
-            this.writeJsDocLines(definition.description);
-        }
+        this.writeJsDocLines(definition.description, definition);
         this.writeIndent();
         if (definition.export) {
             this.write(`export `);
@@ -460,9 +453,7 @@ export class TypeScriptWriter extends CodeWriter {
             this.increaseIndent();
             for (let i = 0, len = definition.members.length; i < len; i++) {
                 const member = definition.members[i];
-                if (member.description) {
-                    this.writeJsDocLines(member.description);
-                }
+                this.writeJsDocLines(member.description, member);
                 this.writeIndent();
                 this.write(member.name);
                 if (member.value || member.value === 0) {
@@ -782,9 +773,19 @@ export class TypeScriptWriter extends CodeWriter {
         return this;
     }
 
-    public writeJsDocLines(lines: string[]): this {
-        if (lines.length === 0)
+    public writeJsDocLines(lines: string[]): this;
+    public writeJsDocLines(lines: string[] | undefined, taggedSymbol: HasJsDocTags | undefined): this;
+    public writeJsDocLines(lines: string[] | undefined, taggedSymbol?: HasJsDocTags): this {
+        lines = lines || [];
+
+        if (taggedSymbol) {
+            if (taggedSymbol.deprecated) {
+                lines.push(`@deprecated ${taggedSymbol.deprecated}`);
+            }
+        }
+        if (lines.length === 0) {
             return this;
+        }
 
         this.writeLine('/**');
 

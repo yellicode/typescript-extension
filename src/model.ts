@@ -1,5 +1,4 @@
 import { TypeScriptWriter } from './typescript-writer';
-import { DefinitionBuilder } from './definition-builder';
 
 /**
  * Enumerates the valid TypeScript access modifiers.
@@ -21,6 +20,13 @@ export interface DefinitionBase {
     * Gets the description of the element. This field is optional.
     */
     description?: string[];
+}
+
+export interface HasJsDocTags {
+    /**
+     * Writes the @deprecated annotation, marking a symbol as being deprecated.
+     */
+    deprecated?: string;
 }
 
 /**
@@ -59,7 +65,7 @@ export interface Decoratable {
 /**
  * The base interface for class-, interface and enumeration definitions.
  */
-export interface TypeDefinition extends DefinitionBase, NamedDefinition {
+export interface TypeDefinition extends DefinitionBase, NamedDefinition, HasJsDocTags {
     /**
      * Indicates if the 'export' keyword should be written. The default value is false.
      */
@@ -104,7 +110,7 @@ export interface VariableDefinition extends DefinitionBase, NamedDefinition {
 /**
  * Represents a TypeScript property.
  */
-export interface PropertyDefinition extends DefinitionBase, NamedDefinition, Decoratable {
+export interface PropertyDefinition extends DefinitionBase, NamedDefinition, Decoratable, HasJsDocTags {
     /**
     * The full type name of the property. If the type is an array,
     * the collection must be part of the name (e.g. 'Array<string>'
@@ -187,7 +193,7 @@ export interface ParameterDefinition extends DefinitionBase, NamedDefinition {
 /**
  * Represents a TypeScript function.
  */
-export interface FunctionDefinition extends DefinitionBase {
+export interface FunctionDefinition extends DefinitionBase, HasJsDocTags {
      /**
      * Get or sets the name of the function. This field is required,
      * except when isConstructor is true.
@@ -236,7 +242,6 @@ export interface FunctionDefinition extends DefinitionBase {
     isConstructor?: boolean;
 }
 
-
 /**
  * Represents a TypeScript class.
  */
@@ -269,7 +274,7 @@ export interface ClassDefinition extends TypeDefinition, Decoratable {
 /**
  * Represents a TypeScript enumeration member.
  */
-export interface EnumMemberDefinition extends DefinitionBase, NamedDefinition {
+export interface EnumMemberDefinition extends DefinitionBase, NamedDefinition, HasJsDocTags {
     /**
      * The value of the member, which can either be a number or a string.
      * This field is optional. If this field has a value, an initializer
