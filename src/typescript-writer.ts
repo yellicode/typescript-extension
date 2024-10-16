@@ -456,7 +456,7 @@ export class TypeScriptWriter extends CodeWriter {
                 this.writeJsDocLines(member.description, member);
                 this.writeIndent();
                 this.write(member.name);
-                if (member.value || member.value === 0) {
+                if (member.value != null) {
                     const initialValue = (typeof member.value === "number") ?
                         member.value.toString() : `'${member.value}'`; // a string enum: wrap in quotes
                     this.write(` = ${initialValue}`);
