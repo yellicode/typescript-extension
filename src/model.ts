@@ -199,17 +199,20 @@ export interface FunctionDefinition extends DefinitionBase, HasJsDocTags {
      * except when isConstructor is true.
      */
     name?: string | 'constructor';
-
     /**
     * Gets the function's access modifier. By default, no access modifier will be written.
     */
-    accessModifier?: AccessModifier;
-
+    accessModifier?: AccessModifier;    
     /**
      * Indicates if the function should be generated as an 'abstract' function.
      * The default value is false.
      */
     isAbstract?: boolean;
+    /**
+     * Indicates if the function should be generated as an async function because it
+     * contains one or more await statements.
+     */
+    isAsync?: boolean;
     /**
      * Indicates if the function is static. The default value is false.
      */

@@ -623,6 +623,9 @@ export class TypeScriptWriter extends CodeWriter {
             else if (definition.isAbstract) {
                 this.write('abstract ');
             }
+            if (definition.isAsync) {
+                this.write('async ');
+            }
             if (definition.name) this.write(definition.name);
             else console.warn('Function definition is missing a name and is not a constructor.');
         }
@@ -638,8 +641,9 @@ export class TypeScriptWriter extends CodeWriter {
         this.write(')');
         // Write the return type
         if (!isConstructor) {
+            const returnTypeName = definition.returnTypeName || 'void';
             this.write(': ');
-            this.write(definition.returnTypeName || 'void');
+            this.write(definition.isAsync ? `Promise<${returnTypeName}>` : returnTypeName);
             if (definition.returnsOptional) {
                 this.write(' | null');
             }
