@@ -85,7 +85,7 @@ export interface VariableDefinition extends DefinitionBase, NamedDefinition {
     * the collection must be part of the name (e.g. 'Array<string>'
     * or 'string[]').
     */
-    typeName: string;
+    typeName?: string;
 
     /**
      * The default value of the property. If provided, an intitializer will be written.
@@ -116,7 +116,7 @@ export interface PropertyDefinition extends DefinitionBase, NamedDefinition, Dec
     * the collection must be part of the name (e.g. 'Array<string>'
     * or 'string[]').
     */
-    typeName: string;
+    typeName?: string;
     /**
      * Gets the property's access modifier. By default, no access modifier will be written.
      */
@@ -162,7 +162,7 @@ export interface ParameterDefinition extends DefinitionBase, NamedDefinition {
      * The full type name of the parameter. If the type is a collection,
      * the collection must be part of the name (e.g. 'string[]').
      */
-    typeName: string;
+    typeName?: string;
 
     /**
     * Indicates if the parameter is optional. If true, the parameter will be generated

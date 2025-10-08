@@ -124,10 +124,10 @@ export class TypeScriptWriter extends CodeWriter {
         return this;
     }
 
-     /**
-     * Writes a decorator, either inline or on a separate line.
-     * @param definition The decorator definition.
-     */
+    /**
+    * Writes a decorator, either inline or on a separate line.
+    * @param definition The decorator definition.
+    */
     public writeDecorators(decorators: DecoratorDefinition[], inline?: boolean): this {
         decorators.forEach(d => {
             this.writeDecorator(d, inline);
@@ -367,10 +367,13 @@ export class TypeScriptWriter extends CodeWriter {
             this.write('!');
         }
         // Type
-        this.write(`: ${definition.typeName}`);
-        if (definition.isOptional && definition.hasNullUnionType) {
-            this.write(' | null');
+        if (definition.typeName) {
+            this.write(`: ${definition.typeName}`);
+            if (definition.isOptional && definition.hasNullUnionType) {
+                this.write(' | null');
+            }
         }
+
         // Initializer
         if (hasDefaultValue) {
             this.write(' = ');
@@ -676,7 +679,7 @@ export class TypeScriptWriter extends CodeWriter {
             if (p.isOptional && (p.useQuestionToken)) {
                 this.write('?');
             }
-            this.write(`: ${p.typeName}`);
+            this.write(`: ${p.typeName || 'any'}`);
             if (p.isOptional && !p.useQuestionToken) {
                 this.write(' | null');
             }
@@ -684,7 +687,7 @@ export class TypeScriptWriter extends CodeWriter {
         });
         if (multiLine) {
             this.writeEndOfLine()
-            .decreaseIndent().writeIndent() // make the closing ')' appear on the next line
+                .decreaseIndent().writeIndent() // make the closing ')' appear on the next line
         }
     }
 
