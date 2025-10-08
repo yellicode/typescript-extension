@@ -1,6 +1,6 @@
 {
   "name": "@yellicode/typescript",
-  "version": "1.14.2",
+  "version": "1.14.3",
   "description": "TypeScript extension for Yellicode - an extensible code generator.",
   "keywords": [
     "code generator",
