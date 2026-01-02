@@ -383,7 +383,7 @@ export class TypeScriptWriter extends CodeWriter {
         return this;
     }
 
-    protected writePropertyDefaultValue(value: any | ((output: TypeScriptWriter) => void)) {
+    public writePropertyDefaultValue(value: any | ((output: TypeScriptWriter) => void)) {
         if (value === null) {
             // The default value was explicitly set to null.
             this.write('null');
@@ -607,7 +607,6 @@ export class TypeScriptWriter extends CodeWriter {
         // if (definition.declare) {
         //     this.write('declare ');
         // }
-
 
         // Start a new, indented line
         this.writeIndent();
