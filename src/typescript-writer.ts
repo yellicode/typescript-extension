@@ -619,17 +619,24 @@ export class TypeScriptWriter extends CodeWriter {
             if (definition.accessModifier) {
                 this.write(`${definition.accessModifier} `);
             }
-            // Static modifier
-            if (definition.isStatic) {
-                this.write('static ');
-            }
-            else if (definition.isAbstract) {
-                this.write('abstract ');
+            if (!definition.isStandalone) {
+                // Class function
+                if (definition.isStatic) {
+                    this.write('static ');
+                }
+                else if (definition.isAbstract) {
+                    this.write('abstract ');
+                }
             }
             if (definition.isAsync) {
                 this.write('async ');
             }
-            if (definition.name) this.write(definition.name);
+            if (definition.isStandalone) {
+                this.write('function ');
+            }
+            if (definition.name) {
+                this.write(definition.name);
+            }
             else console.warn('Function definition is missing a name and is not a constructor.');
         }
         // If needed, make the function optional using the '?'

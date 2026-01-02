@@ -194,15 +194,15 @@ export interface ParameterDefinition extends DefinitionBase, NamedDefinition {
  * Represents a TypeScript function.
  */
 export interface FunctionDefinition extends DefinitionBase, HasJsDocTags {
-     /**
-     * Get or sets the name of the function. This field is required,
-     * except when isConstructor is true.
-     */
+    /**
+    * Get or sets the name of the function. This field is required,
+    * except when isConstructor is true.
+    */
     name?: string | 'constructor';
     /**
     * Gets the function's access modifier. By default, no access modifier will be written.
     */
-    accessModifier?: AccessModifier;    
+    accessModifier?: AccessModifier;
     /**
      * Indicates if the function should be generated as an 'abstract' function.
      * The default value is false.
@@ -243,6 +243,12 @@ export interface FunctionDefinition extends DefinitionBase, HasJsDocTags {
      * Indicates if the function is a constructor.
      */
     isConstructor?: boolean;
+
+    /**
+     * Indicates that the function is not a class method and will
+     * be declared using the "function" keyword.
+     */
+    isStandalone?: boolean;
 }
 
 /**
@@ -294,10 +300,10 @@ export interface EnumDefinition extends TypeDefinition {
      * Contains the enumeration members. This field is optional.
      */
     members?: EnumMemberDefinition[];
-     /**
-     * True if the enum should be a const enum. Const enums can only use constant enum expressions and
-     * unlike regular enums they are completely removed during compilation.
-     */
+    /**
+    * True if the enum should be a const enum. Const enums can only use constant enum expressions and
+    * unlike regular enums they are completely removed during compilation.
+    */
     const?: boolean;
 }
 
@@ -311,9 +317,9 @@ export interface InterfaceDefinition extends TypeDefinition {
     * This field is optional.
     */
     extends?: string[];
-     /**
-     * Gets the interface properties.
-     */
+    /**
+    * Gets the interface properties.
+    */
     properties?: PropertyDefinition[];
     /**
      * Gets the interface functions.
