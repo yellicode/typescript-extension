@@ -761,11 +761,14 @@ export class TypeScriptWriter extends CodeWriter {
     }
 
     private pushJsDocLinesForParameters(parameters: ParameterDefinition[], lines: string[]): void {
-        if (!parameters)
+        if (!parameters) {
             return;
+        }
 
         parameters.forEach((p: ParameterDefinition) => {
-            lines.push(this.getJsDocLineForParameter(p));
+            if (p.description) {
+                lines.push(this.getJsDocLineForParameter(p));
+            }
         });
     }
 
