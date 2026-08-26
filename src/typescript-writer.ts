@@ -291,6 +291,56 @@ export class TypeScriptWriter extends CodeWriter {
         return this;
     }
 
+    /**
+      * Writes a block of code, wrapped in a type declaration and opening and closing brackets.
+      * This function does not write type members.
+      * @param type The interface definition from which to create the type block.
+      * @param contents A callback function that writes the interface contents.
+      */
+    public writeTypeBlock(type: InterfaceDefinition, contents: (writer: TypeScriptWriter) => void): this
+    /**
+     * Writes a block of code, wrapped in a type declaration and opening and closing brackets.
+     * This function does not write type members.
+     * @param type A model type from which to create the type block.
+     * @param contents A callback function that writes the type contents.
+     * @param options An optional InterfaceOptions object.
+     */
+    public writeTypeBlock(type: elements.Type, contents: (writer: TypeScriptWriter) => void, options?: opts.InterfaceOptions): this
+    public writeTypeBlock(type: any, contents: (writer: TypeScriptWriter) => void, options?: opts.InterfaceOptions): this {
+        if (!type) return this;
+
+        let definition: InterfaceDefinition;
+        if (elements.isType(type)) {
+            definition = this.definitionBuilder.buildInterfaceDefinition(type, options);
+        }
+        else definition = type;
+
+        this.writeJsDocLines(definition.description, definition);
+        this.writeIndent();
+        if (definition.export) {
+            this.write(`export `);
+        }
+        if (definition.declare) {
+            this.write('declare ');
+        }
+
+        this.write(`type ${definition.name} =`);
+
+        // Write the contents
+        this.writeEndOfLine(' {');
+        this.increaseIndent();
+        if (contents) contents(this);
+        this.decreaseIndent();
+        // Closing the block: either with a simple "}" or with base types like "} & Base1 & Base2"
+        this.write('}');
+        if (definition.extends?.length) {
+            this.write(` & ${definition.extends.join(' & ')}`);
+        }
+        this.writeEndOfLine();
+        return this;
+    }
+
+
     protected /* virtual */ writeExtends(ext: string[]): void {
         if (ext.length === 0)
             return;

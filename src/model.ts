@@ -24,7 +24,7 @@ export interface DefinitionBase {
 
 export interface HasJsDocTags {
     /**
-     * Writes the @deprecated annotation, marking a symbol as being deprecated.
+     * Writes the \@deprecated annotation, marking a symbol as being deprecated.
      */
     deprecated?: string;
 }
