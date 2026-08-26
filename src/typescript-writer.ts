@@ -825,12 +825,14 @@ export class TypeScriptWriter extends CodeWriter {
                 // See if we can split the line
                 var split: string[] = CodeWriterUtility.wordWrap(line, this.maxCommentWidth);
                 split.forEach(s => {
-                    this.writeLine(`* ${s}`);
+                    this.writeLine(` * ${s}`);
                 })
             }
-            else this.writeLine(`* ${line}`);
+            else {
+                this.writeLine(` * ${line}`);
+            }
         });
-        this.writeLine('*/');
+        this.writeLine(' */');
         return this;
     }
 
